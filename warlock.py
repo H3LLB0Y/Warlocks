@@ -24,7 +24,7 @@ class Warlock(Actor):
 		self.index=index
 		
 		# Load warlock model
-		Actor.__init__(self,"media/warlock/warlock")
+		Actor.__init__(self,"models/warlock")
 		# Reparent the model to render.
 		self.reparentTo(render)
 		
@@ -33,7 +33,7 @@ class Warlock(Actor):
 		
 		self.destination=(self.POSITIONS[index][0])
 		self.new_destination=False
-		self.dest_node=showbase.loader.loadModel("media/warlock/dest/dest")
+		self.dest_node=showbase.loader.loadModel("models/dest")
 		# Reparent the model to render
 		self.dest_node.reparentTo(render)
 		self.dest_node.setScale(0.25)

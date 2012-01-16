@@ -13,7 +13,7 @@ class Lobby():
 		self.game.which=0
 		
 		self.background = OnscreenImage(
-			image  = 'media/gui/lobby.jpg',
+			image  = 'models/lobby.jpg',
 			parent = render2d
 		)
 		

@@ -4,7 +4,7 @@ from pandac.PandaModules import *
 class World():
 	def __init__(self,showbase):
 		# Load the environment model (Ground and Surrounding Rocks)
-		self.model = showbase.loader.loadModel("media/world/world")
+		self.model = showbase.loader.loadModel("models/world")
 		# Reparent the model to render
 		self.model.reparentTo(render)
 		# Scale environment
