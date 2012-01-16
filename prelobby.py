@@ -8,7 +8,7 @@ class PreLobby():
 		self.game=game
 		
 		self.background = OnscreenImage(
-			image  = 'models/gui/bg.jpg',
+			image  = 'media/gui/bg.jpg',
 			parent = render2d
 		)
 		
@@ -41,7 +41,7 @@ class PreLobby():
 
 		# Adding a frame for looks.
 		p = boxloc + Vec3(-0.15, 0.0, 0.0)
-		self.loginFrame = DirectFrame (image = ('models/gui/frame.png'), image_scale = (0.4, 0.4, 0.35))
+		self.loginFrame = DirectFrame (image = ('media/gui/frame.png'), image_scale = (0.4, 0.4, 0.35))
 		
 		# p is the position of the form element relative to the boxloc
 		# coordinates set above it is changed for every form element
@@ -64,12 +64,12 @@ class PreLobby():
 		# with a * like a standard password box
 
 		p = boxloc + Vec3(0, 0, -0.23)
-		self.loginButton = DirectButton(image = ('models/gui/login_bt.png'), pos = p,  scale = 0.14, image_scale = (0.48, 0.48, 0.34), command=self.attemptLogin)
+		self.loginButton = DirectButton(image = ('media/gui/login_bt.png'), pos = p,  scale = 0.14, image_scale = (0.48, 0.48, 0.34), command=self.attemptLogin)
 		# The 'Login' button that will trigger the attemptLogin function
 		# when clicked
 		
 		p = boxloc + Vec3(0.2, 0, -0.23)
-		self.quitButton = DirectButton(image = ('models/gui/exit_bt.png'), pos = p, scale = 0.14, image_scale = (0.48, 0.48, 0.34),  command=self.game.quit)
+		self.quitButton = DirectButton(image = ('media/gui/exit_bt.png'), pos = p, scale = 0.14, image_scale = (0.48, 0.48, 0.34),  command=self.game.quit)
 		# The 'Quit' button that will trigger the Quit function
 		# when clicked
 
