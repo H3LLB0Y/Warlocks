@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# This is my eDIT
+# This is my eDIT edit more
 from pandac.PandaModules import QueuedConnectionManager, QueuedConnectionListener
 from pandac.PandaModules import QueuedConnectionReader, ConnectionWriter
 from direct.distributed.PyDatagram import PyDatagram
