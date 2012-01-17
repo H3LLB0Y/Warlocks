@@ -37,6 +37,10 @@ class Warlock(Actor):
 		# Reparent the model to render
 		self.dest_node.reparentTo(render)
 		self.dest_node.setScale(0.25)
+		
+		self.spell=0
+		self.spell_target=Vec3(0,0,0)
+		self.casting=False
 
 		self.colSphere = CollisionSphere(0, 0, 2.5, 3)
 		self.colNode = self.attachNewNode(CollisionNode('playerNode'))
@@ -55,6 +59,19 @@ class Warlock(Actor):
 		self.destination.setY(clamp(self.destination.getY(),-80,80))
 		self.new_destination=True
 		self.dest_node.setPos(self.destination)
+		self.casting=False
+	
+	def get_spell(self):
+		return self.spell
+	
+	def get_target(self):
+		return [self.spell_target.getX(),self.spell_target.getY()]
+	
+	def set_spell(self,spell,target):
+		self.spell=spell
+		self.spell_target=Vec3(target[0],target[1],0)
+		self.new_destination=False
+		self.casting=True
 	
 	def adjust_angle(self,angle,dt):
 		targetH = angle
@@ -82,13 +99,23 @@ class Warlock(Actor):
 		self.dest_node.setH(self.getH())
 		if self.damage<1:
 			self.damage=1
+		
+		# develocitize the destination velocity (slow it down, will get reset if it is still going to destination
+		self.dest_vel.setX(self.dest_vel.getX()*(1-2.5*dt))
+		self.dest_vel.setY(self.dest_vel.getY()*(1-2.5*dt))
+		
 		# if spell is being cast
-			# if not facing target
-				# turn to face target
-			# else
+		if self.casting:
+			# calculate difference in angles between warlock and destination
+			self.diff_angle = ((atan2(self.spell_target.getY()-self.getY(),self.spell_target.getX()-self.getX()) * (180 / pi)) + 270.0)%360.0
+			# turn to face target
+			self.adjust_angle(self.diff_angle,dt)
+			# if facing target
+			if (self.diff_angle<10):
 				# cast spell
+				self.casting=False # but in this case we are just saying spell is done :D
 		# else if moving to new destination
-		if self.new_destination:
+		elif self.new_destination:
 			# calculate difference in angles between warlock and destination
 			self.diff_angle = ((atan2(self.destination.getY()-self.getY(),self.destination.getX()-self.getX()) * (180 / pi)) + 270.0)%360.0
 			# turn to face target
@@ -102,9 +129,6 @@ class Warlock(Actor):
 				self.new_destination=False
 				self.dest_node.setZ(-10)
 				# set animation to idle
-		else:
-			self.dest_vel.setX(self.dest_vel.getX()*(1-2.5*dt))
-			self.dest_vel.setY(self.dest_vel.getY()*(1-2.5*dt))
 		
 		# decrease spell velocity (friction)
 		self.spell_vel.setX(self.spell_vel.getX()*(1-1.25*dt*(5.0/self.damage)))

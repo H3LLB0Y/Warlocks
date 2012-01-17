@@ -97,11 +97,17 @@ class Playstate():
 		
 	def cast_spell(self):
 		if not self.current_spell==0:
-			data = {}
-			data[0] = "spell"
-			data[1] = self.current_spell
-			self.showbase.client.sendData(data)
-			self.current_spell=0
+			target=self.ch.get_mouse_3d()
+			if not target.getZ()==-1:
+				data = {}
+				data[0] = "spell"
+				data[1] = {}
+				data[1][0] = self.current_spell
+				data[1][1] = {}
+				data[1][1][0] = target.getX()
+				data[1][1][1] = target.getY()
+				self.showbase.client.sendData(data)
+				self.current_spell=0
 		
 	def update_destination(self):
 		print "update_destination "+str(self.current_spell)
@@ -161,10 +167,15 @@ class Playstate():
 					# otherwise put packet back on front of list and end frame processing
 					self.incoming.appendleft(package)
 					break
-			elif package[0]=='update':
+			elif package[0]=='update_dest':
 				# if its an update packet then update destination of required warlock
-				print "Update: "+str(package[1])+" "+str(package[2])
+				print "Update Destination: "+str(package[1])+" "+str(package[2])
 				self.game.warlock[package[1]].set_destination(Vec3(package[2][0],package[2][1],0))
+				valid_packet=True
+			elif package[0]=='update_spell':
+				# if its an update packet then update destination of required warlock
+				print "Update Spell: "+str(package[1])+" "+str(package[2])+" "+str(package[3])
+				self.game.warlock[package[1]].set_spell(package[2],package[3])
 				valid_packet=True
 			if not valid_packet:
 				data = {}

@@ -79,6 +79,7 @@ class ServerInst():
 								new_user['ready']=False
 								#new_user['warlock']=self.warlock=Warlock(self.showbase,len(self.users))
 								new_user['new_dest']=False
+								new_user['new_spell']=False
 								self.users[len(self.users)]=new_user
 								data = {}
 								data[0] = "which"
@@ -171,7 +172,6 @@ class ServerInst():
 						print "Received: " + str(package) +" "+str(package[1])
 						if len(package[0])==2:
 							print "packet right size"
-							
 							# else check to make sure connection has username
 							for u in range(len(self.users)):
 								if self.users[u]['connection']==package[1]:
@@ -188,11 +188,11 @@ class ServerInst():
 										print "Spell: "+str(package[0][1])
 										valid_packet=True
 										# Update warlock data for client
-										#self.users[u]['warlock'].set_destination(Vec3(package[0][1][0],package[0][1][1],0))
-										#self.users[u]['new_dest']=True
+										self.users[u]['warlock'].set_spell(package[0][1][0],package[0][1][1])
+										self.users[u]['new_spell']=True
 									break
 								else:
-									print str(self.users[u]['connection'])+" "+str(package[1])
+									print "couldnt find connection"+str(self.users[u]['connection'])+" "+str(package[1])
 			# get frame delta time
 			dt=globalClock.getDt()
 			self.game_time+=dt
@@ -200,16 +200,25 @@ class ServerInst():
 			# tick out for clients
 			if (self.game_time>game_tick):
 				# update all clients with new info before saying tick
-				# new warlock destinations
 				for u in range(len(self.users)):
+					# new warlock destinations
 					if self.users[u]['new_dest']:
 						data = {}
-						data[0]='update'
+						data[0]='update_dest'
 						data[1]=u
 						data[2]={}
 						data[2][0]=self.users[u]['warlock'].destination.getX()
 						data[2][1]=self.users[u]['warlock'].destination.getY()
 						self.users[u]['new_dest']=False
+						self.server.broadcastData(data)
+					# new warlock spell
+					elif self.users[u]['new_spell']:
+						data = {}
+						data[0]='update_spell'
+						data[1]=u
+						data[2]=self.users[u]['warlock'].get_spell()
+						data[3]=self.users[u]['warlock'].get_target()
+						self.users[u]['new_spell']=False
 						self.server.broadcastData(data)
 				
 				data = {}
