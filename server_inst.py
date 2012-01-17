@@ -184,6 +184,12 @@ class ServerInst():
 										# Update warlock data for client
 										self.users[u]['warlock'].set_destination(Vec3(package[0][1][0],package[0][1][1],0))
 										self.users[u]['new_dest']=True
+									elif package[0][0]=='spell':
+										print "Spell: "+str(package[0][1])
+										valid_packet=True
+										# Update warlock data for client
+										#self.users[u]['warlock'].set_destination(Vec3(package[0][1][0],package[0][1][1],0))
+										#self.users[u]['new_dest']=True
 									break
 								else:
 									print str(self.users[u]['connection'])+" "+str(package[1])
