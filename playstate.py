@@ -56,17 +56,23 @@ class Playstate():
 		
 		# Set event handlers for keys		
 		self.showbase.accept("escape",sys.exit)
-		# Using WASD Keys
-		self.showbase.accept("a",set_value,[self.keys,"left",1])
-		self.showbase.accept("d",set_value,[self.keys,"right",1])
-		self.showbase.accept("w",set_value,[self.keys,"up",1])
-		self.showbase.accept("s",set_value,[self.keys,"down",1])
-		self.showbase.accept("a-up",set_value,[self.keys,"left",0])
-		self.showbase.accept("d-up",set_value,[self.keys,"right",0])
-		self.showbase.accept("w-up",set_value,[self.keys,"up",0])
-		self.showbase.accept("s-up",set_value,[self.keys,"down",0])
+		# holding c will focus the camera on clients warlock
 		self.showbase.accept("c",set_value,[self.keys,"c",1])
 		self.showbase.accept("c-up",set_value,[self.keys,"c",0])
+		
+		# variable to track which spell has been requested
+		self.current_spell=0
+		
+		# keys to change spell
+		self.showbase.accept("q",self.set_spell,[1])
+		self.showbase.accept("w",self.set_spell,[2])
+		self.showbase.accept("e",self.set_spell,[3])
+		self.showbase.accept("r",self.set_spell,[4])
+		
+		# mouse 1 is for casting the spell set by the keys
+		self.showbase.accept("mouse1",self.cast_spell)
+		
+		# mouse 3 is for movement, or canceling keys for casting spell
 		self.showbase.accept("mouse3",self.update_destination)
 		
 		# Create a method to read key-status and then do. on server side.
@@ -75,36 +81,51 @@ class Playstate():
 		self.showbase.accept("x",set_value,[self.keys,"spell1", 1])
 		self.showbase.accept("x-up",set_value,[self.keys,"spell1", 0])
 		#self.showbase.accept("a",self.warlock.add_spell_vel,[Vec3(20,0,0)])
-		self.showbase.accept("d",self.warlock.add_spell_vel,[Vec3(-20,0,0)])
-		self.showbase.accept("w",self.warlock.add_spell_vel,[Vec3(0,-20,0)])
-		self.showbase.accept("s",self.warlock.add_spell_vel,[Vec3(0,20,0)])
-		self.showbase.accept("+",self.warlock.add_damage,[1])
-		self.showbase.accept("-",self.warlock.add_damage,[-1])
+		#self.showbase.accept("d",self.warlock.add_spell_vel,[Vec3(-20,0,0)])
+		#self.showbase.accept("w",self.warlock.add_spell_vel,[Vec3(0,-20,0)])
+		#self.showbase.accept("s",self.warlock.add_spell_vel,[Vec3(0,20,0)])
+		#self.showbase.accept("+",self.warlock.add_damage,[1])
+		#self.showbase.accept("-",self.warlock.add_damage,[-1])
 		
 		self.update_camera(0)
 		
 		# Add the game loop procedure to the task manager.
 		self.showbase.taskMgr.add(self.game_loop,"Game Loop")
 		
-	def update_destination(self):
-		destination=self.ch.get_mouse_3d()
-		if (destination.getZ()==0):
+	def set_spell(self,spell):
+		self.current_spell=spell
+		
+	def cast_spell(self):
+		if not self.current_spell==0:
 			data = {}
-			data[0] = "destination"
-			data[1] = {}
-			data[1][0] = destination.getX()
-			data[1][1] = destination.getY()
+			data[0] = "spell"
+			data[1] = self.current_spell
 			self.showbase.client.sendData(data)
+			self.current_spell=0
+		
+	def update_destination(self):
+		print "update_destination "+str(self.current_spell)
+		if self.current_spell==0:
+			destination=self.ch.get_mouse_3d()
+			if not destination.getZ()==-1:
+				data = {}
+				data[0] = "destination"
+				data[1] = {}
+				data[1][0] = destination.getX()
+				data[1][1] = destination.getY()
+				self.showbase.client.sendData(data)
+		else:
+			self.current_spell=0
 
 	def update_camera(self,dt):
-		self.ch.camMoveTask(dt)
 		# sets the camMoveTask to be run every frame
+		self.ch.camMoveTask(dt)
 		
 		# if c is down update camera to always be following on the warlock
-		#if self.keys["c"]:
-		follow=self.warlock
-		self.ch.setTarget(follow.getPos().getX(),follow.getPos().getY(),follow.getPos().getZ())
-		self.ch.turnCameraAroundPoint(0,0)
+		if self.keys["c"]:
+			follow=self.warlock
+			self.ch.setTarget(follow.getPos().getX(),follow.getPos().getY(),follow.getPos().getZ())
+			self.ch.turnCameraAroundPoint(0,0)
 		
 	# Game Loop Procedure
 	def game_loop(self,task):
