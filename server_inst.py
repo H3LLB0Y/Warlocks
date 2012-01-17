@@ -154,6 +154,9 @@ class ServerInst():
 		print "Pregame State"
 		self.game_time=0
 		self.tick=0
+		self.game=Game(len(self.users),game_tick,self.showbase)
+		for u in range(len(self.users)):
+			self.users[u]['warlock']=self.game.warlock[u]
 		taskMgr.doMethodLater(0.5, self.game_loop, 'Game Loop')
 		return task.done
 		return task.again
@@ -213,10 +216,7 @@ class ServerInst():
 				self.game_time-=game_tick
 				self.tick+=1
 				# run simulation
-				for u in range(len(self.users)):
-					self.users[u]['warlock'].update(game_tick)
-				# implement game loop so its same code for server and client
-				# receive updates to warlock and move him
+				self.game.run_tick()
 			return task.cont
 		else:
 			taskMgr.doMethodLater(0.5, self.lobby_loop, 'Lobby Loop')
