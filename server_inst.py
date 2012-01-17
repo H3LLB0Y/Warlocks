@@ -16,8 +16,7 @@ from direct.distributed.PyDatagramIterator import PyDatagramIterator
 from server import *
 from direct.showbase.ShowBase import ShowBase
 
-from warlock						import Warlock
-from world							import World
+from game import Game
 
 game_tick=1.0/60.0
 
@@ -32,8 +31,6 @@ class ServerInst():
 		
 		# Disable Mouse Control for camera
 		self.showbase.disableMouse()
-		
-		self.world=World(self.showbase)
 		
 		camera.setPos(0,0,100)
 		camera.lookAt(0,0,0)
@@ -80,7 +77,7 @@ class ServerInst():
 								new_user['name']=package[0][1]
 								new_user['connection']=package[1]
 								new_user['ready']=False
-								new_user['warlock']=self.warlock=Warlock(self.showbase,len(self.users))
+								#new_user['warlock']=self.warlock=Warlock(self.showbase,len(self.users))
 								new_user['new_dest']=False
 								self.users[len(self.users)]=new_user
 								data = {}

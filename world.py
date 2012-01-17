@@ -16,7 +16,7 @@ class World():
 		self.addBoundary("boundaryBottom", Vec3(0, -1, 0), Point3(0, 1000, 0), (0, -1), (1, -1))
 		self.addBoundary("boundaryTop", Vec3(0, 1, 0), Point3(0, -1000, 0), (0, 1), (1, -1))
 
-		def addBoundary(self, name, orientation, position, posOffset, velMultiplier):
+	def addBoundary(self, name, orientation, position, posOffset, velMultiplier):
 		boundary = CollisionPlane(Plane(orientation, position))
 		boundary.setTangible(True)
 		self.boundaries[name] = [boundary, posOffset, velMultiplier]
@@ -24,7 +24,7 @@ class World():
 		colNode.node().addSolid(boundary)
 		colNode.show()
 
-		def collide(self, ball, boundaryName):
+	def collide(self, ball, boundaryName):
 		vel = ball.body.getLinearVel()
 		pos = ball.body.getPosition()
 
