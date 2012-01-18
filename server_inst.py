@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from pandac.PandaModules import loadPrcFileData
 loadPrcFileData("",
 """
@@ -8,23 +6,17 @@ loadPrcFileData("",
 	show-frame-rate-meter 1
 """
 )
-from direct.showbase.DirectObject import DirectObject
-from pandac.PandaModules import * 
-from direct.task import Task 
-from direct.distributed.PyDatagram import PyDatagram 
-from direct.distributed.PyDatagramIterator import PyDatagramIterator 
-from server import *
-from direct.showbase.ShowBase import ShowBase
 
+from direct.showbase.ShowBase import ShowBase
+from direct.task import Task
+from pandac.PandaModules import *
+
+from server import Server
 from game import Game
 
 game_tick=1.0/60.0
 
 class ServerInst():
-	STATE_LOBBY = 0
-	STATE_PREGAME = 1
-	STATE_GAME = 2
-	
 	def __init__(self):
 		# Initialise Window
 		self.showbase=ShowBase()
@@ -38,13 +30,7 @@ class ServerInst():
 		# Start our server up
 		self.server = Server(9099, compress=True)
 		
-		self.state=self.STATE_LOBBY
-		
 		self.users={}
-		
-		self.showbase.accept("a",self.print_warlocks)
-		
-		#taskMgr.add(self.server_loop,"Server Loop")
 		
 		taskMgr.doMethodLater(0.5, self.lobby_loop, 'Lobby Loop')
 
@@ -233,10 +219,6 @@ class ServerInst():
 		else:
 			taskMgr.doMethodLater(0.5, self.lobby_loop, 'Lobby Loop')
 			return task.done
-
-	def print_warlocks(self):
-		for u in range(len(self.users)):
-			print self.users[u]['warlock'].getPos()
 
 si = ServerInst()
 run()

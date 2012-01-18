@@ -50,6 +50,7 @@ class Playstate():
 		self.game=Game(self.showbase.num_warlocks,game_tick,self.showbase)
 		
 		self.warlock=self.game.warlock[self.showbase.which]
+		self.warlock.attach_ring(self.showbase)
 
 		self.tick=0
 		self.temp_tick=0

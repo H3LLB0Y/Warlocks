@@ -12,7 +12,6 @@ loadPrcFileData("",
 )
 
 from direct.showbase.ShowBase import ShowBase
-from direct.showbase.DirectObject import DirectObject
 from direct.gui.OnscreenText  import OnscreenText
 
 from pandac.PandaModules      import *
@@ -26,7 +25,7 @@ from lobby import Lobby
 from pregame import Pregame
 from playstate import Playstate
 
-class Main(ShowBase, DirectObject):
+class Main(ShowBase):
 	def __init__(self):
 		self.created_client=False
 		ShowBase.__init__(self)
