@@ -28,8 +28,8 @@ class CameraHandler(DirectObject.DirectObject):
 		base.disableMouse() 
 		# This disables the default mouse based camera control used by panda. This default control is awkward, and won't be used. 
 
-		base.camera.setPos(0,20,30) 
-		base.camera.lookAt(0,0,0) 
+		base.camera.setPos(0,-35,40) 
+		base.camera.lookAt(0,0,0)
 		# Gives the camera an initial position and rotation. 
 
 		self.mx,self.my=0,0 
@@ -42,7 +42,7 @@ class CameraHandler(DirectObject.DirectObject):
 		self.target=Vec3() 
 		# sets up a vector variable for the camera's target. The target will be the coordinates that the camera is currently focusing on. 
 
-		self.camDist = 55 
+		self.camDist = 60 
 		# A variable that will determine how far the camera is from it's target focus 
 
 		self.panRateDivisor = 10
@@ -53,8 +53,8 @@ class CameraHandler(DirectObject.DirectObject):
 		# This variable controls how close the mouse cursor needs to be to the edge of the screen to start panning the camera. It must be less than 1, 
 		# and I recommend keeping it less than .2 
 
-		self.panLimitsX = Vec2(-20, 20) 
-		self.panLimitsY = Vec2(-20, 20) 
+		self.panLimitsX = Vec2(-110, 110) 
+		self.panLimitsY = Vec2(-110, 110) 
 		# These two vairables will serve as limits for how far the camera can pan, so you don't scroll away from the map.
 
 		self.maxZoomOut = 100
@@ -105,7 +105,7 @@ class CameraHandler(DirectObject.DirectObject):
 		self.accept("arrow_up-up",set_value,[self.keys,"cam-up",0])
 		self.accept("arrow_down-up",set_value,[self.keys,"cam-down",0])
 		
-		self.key_pan_rate=0.35
+		self.key_pan_rate=0.75
 		# pan rate for when user presses the arrow keys
 		
 		# CHESSBOARD STUFF FOR PICKING POINT IN 3D SPACE FROM MOUSE CLICK
@@ -129,13 +129,11 @@ class CameraHandler(DirectObject.DirectObject):
 		# UNTIL HERE
 
 	def zoomOut(self):
-		print "Zoom Out: " ,self.camDist
 		if(self.camDist <= self.maxZoomOut):
 			self.adjustCamDist(1.1)
 		return True
 
 	def zoomIn(self):
-		print "Zoom In:",self.camDist
 		if(self.camDist >= self.maxZoomIn):
 			self.adjustCamDist(0.9)
 		return True

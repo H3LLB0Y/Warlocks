@@ -9,50 +9,52 @@ import math
 
 # Warlock Class
 class Warlock(Actor):
-	POSITIONS = [
-		[(6, 10, 0),    (-30,  0, 0)],
-		[(-6, -10, 0),  (-210, 0, 0)],
-		[(12, 10, 0),   (-30,  0, 0)],
-		[(-12, -10, 0), (-210, 0, 0)],
-		[(6, 20, 0),    (-30,  0, 0)],
-		[(-6, -20, 0),  (-210, 0, 0)],
-		[(12, 20, 0),   (-30,  0, 0)],
-		[(-12, -20, 0), (-210, 0, 0)]
-	]
-
-	def __init__(self,showbase,index):
-		self.index=index
-		
+	# Setup function for Warlock
+	def __init__(self,showbase,index,num_warlocks):
 		# Load warlock model
 		Actor.__init__(self,"media/warlock/warlock")
 		# Reparent the model to render.
 		self.reparentTo(render)
 		
-		self.setPos(self.POSITIONS[index][0])
-		self.setHpr(self.POSITIONS[index][1])
+		# rotation between each warlock for even spacing
+		rotation=360.0/num_warlocks
+		# adjust rotation for this warlock
+		rotation*=(index+1)
 		
-		self.destination=(self.POSITIONS[index][0])
+		# set its position 80 units from center and face warlock to center
+		self.setPos(move_forwards(rotation,-80.0))
+		self.setHpr(Vec3(rotation,0,0))
+		
+		# destination (will be flag model or something eventually)
+		self.destination=(self.getPos())
 		self.new_destination=False
 		self.dest_node=showbase.loader.loadModel("media/warlock/dest/dest")
 		# Reparent the model to render
 		self.dest_node.reparentTo(render)
-		self.dest_node.setZ(-10)
 		self.dest_node.setScale(0.25)
+		self.dest_node.setZ(-10)
 		
+		# initialise warlock spell stuff
 		self.spell=0
 		self.spell_target=Vec3(0,0,0)
 		self.casting=False
-
+		
+		# physics velocities (one for movement to destination, other for knock around caused by spells)
+		self.dest_vel=Vec3(0,0,0)
+		self.spell_vel=Vec3(0,0,0)
+		# damage taken by warlock affects the friction applied to them, more damage == more slidey
+		self.damage=1
+		
+		# hit points of warlock
+		self.hp=100.0
+		
+		# collision sphere for collision detection
 		self.colSphere = CollisionSphere(0, 0, 2.5, 3)
 		self.colNode = self.attachNewNode(CollisionNode('playerNode'))
 		self.colNode.node().addSolid(self.colSphere)
 		self.colNode.show()
 		
-		self.dest_vel=Vec3(0,0,0)
-		self.spell_vel=Vec3(0,0,0)
-		
-		self.damage=1
-		
+	# for client to attach ring below clients warlock
 	def attach_ring(self,showbase):
 		self.ring_node=showbase.loader.loadModel("media/warlock/warlock_ring")
 		self.ring_node.reparentTo(self)
@@ -72,6 +74,7 @@ class Warlock(Actor):
 	def get_target(self):
 		return [self.spell_target.getX(),self.spell_target.getY()]
 	
+	# set warlock to spell cast mode
 	def set_spell(self,spell,target):
 		self.spell=spell
 		self.spell_target=Vec3(target[0],target[1],0)
@@ -79,6 +82,7 @@ class Warlock(Actor):
 		self.new_destination=False
 		self.casting=True
 	
+	# turn warlock to face destination/target
 	def adjust_angle(self,angle,dt):
 		targetH = angle
 		oldH = self.getH()
@@ -93,14 +97,17 @@ class Warlock(Actor):
 			self.setH((self.getH()+(targetH-oldH))%360)
 		# turns with speed relating to difference in angle (too slow when low angles i think)
 		#self.setH(self,(3*(targetH-oldH)*dt)%360)
-		
+	
+	# will be for knock around caused by spells
 	def add_spell_vel(self,spell_vel):
 		self.spell_vel.setX(self.spell_vel.getX()+spell_vel.getX())
 		self.spell_vel.setY(self.spell_vel.getY()+spell_vel.getY())
-		
+	
+	# will be for damage caused by spells
 	def add_damage(self,damage):
 		self.damage+=damage
-
+	
+	# update function for warlock, processes physics and movement/turning of warlock
 	def update(self,dt):
 		self.dest_node.setH(self.getH())
 		if self.damage<1:

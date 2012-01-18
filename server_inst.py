@@ -24,7 +24,7 @@ class ServerInst():
 		# Disable Mouse Control for camera
 		self.showbase.disableMouse()
 		
-		camera.setPos(0,0,100)
+		camera.setPos(0,0,350)
 		camera.lookAt(0,0,0)
 		
 		# Start our server up
@@ -143,7 +143,7 @@ class ServerInst():
 			self.users[u]['warlock']=self.game.warlock[u]
 		taskMgr.doMethodLater(0.5, self.game_loop, 'Game Loop')
 		return task.done
-		return task.again
+		#return task.again
 		
 	def game_loop(self,task):
 		# if there is any clients connected

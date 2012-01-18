@@ -37,7 +37,7 @@ class Playstate():
 		self.incoming=deque()
 		
 		# this is unnecessary lol but meh ill comment it anyway
-		self.title = OnscreenText(text = "Angle: "+str(0.0), pos = (0.95,-0.95), 
+		self.hp = OnscreenText(text = "HP: "+str(100.0), pos = (0.95,-0.95), 
 											scale = 0.07,fg=(1,1,1,1),align=TextNode.ACenter,mayChange=1)
 		
 		# Keys array (down if 1, up if 0)
@@ -51,7 +51,7 @@ class Playstate():
 		
 		self.warlock=self.game.warlock[self.showbase.which]
 		self.warlock.attach_ring(self.showbase)
-
+		
 		self.tick=0
 		self.temp_tick=0
 		
@@ -88,14 +88,18 @@ class Playstate():
 		#self.showbase.accept("+",self.warlock.add_damage,[1])
 		#self.showbase.accept("-",self.warlock.add_damage,[-1])
 		
-		self.update_camera(0)
+		# sets the camera up behind clients warlock looking down on it from angle
+		follow=self.warlock
+		self.ch.setTarget(follow.getPos().getX(),follow.getPos().getY(),follow.getPos().getZ())
+		self.ch.turnCameraAroundPoint(0,0)
 		
 		# Add the game loop procedure to the task manager.
 		self.showbase.taskMgr.add(self.game_loop,"Game Loop")
 		
 	def set_spell(self,spell):
 		self.current_spell=spell
-		
+	
+	# sends spell request to server if one is selected
 	def cast_spell(self):
 		if not self.current_spell==0:
 			target=self.ch.get_mouse_3d()
@@ -109,7 +113,8 @@ class Playstate():
 				data[1][1][1] = target.getY()
 				self.showbase.client.sendData(data)
 				self.current_spell=0
-		
+	
+	# sends destination request to server, or cancels spell if selected
 	def update_destination(self):
 		print "update_destination "+str(self.current_spell)
 		if self.current_spell==0:
@@ -160,6 +165,7 @@ class Playstate():
 					# run tick
 					self.game.run_tick()
 					self.update_camera(game_tick)
+					self.hp.setText("HP: "+str(self.warlock.hp))
 					#self.tick+=1
 					valid_packet=True
 				else:

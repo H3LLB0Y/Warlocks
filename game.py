@@ -10,7 +10,7 @@ class Game():
 		
 		self.warlock={}
 		for u in range(self.num_warlocks):
-			self.warlock[u]=Warlock(showbase,u)
+			self.warlock[u]=Warlock(showbase,u,self.num_warlocks)
 		
 	def run_tick(self):
 		# here implement some kind of sliding phyiscs based on damage taken already
