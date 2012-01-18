@@ -91,7 +91,7 @@ class Playstate():
 		# sets the camera up behind clients warlock looking down on it from angle
 		follow=self.warlock
 		self.ch.setTarget(follow.getPos().getX(),follow.getPos().getY(),follow.getPos().getZ())
-		self.ch.turnCameraAroundPoint(0,0)
+		self.ch.turnCameraAroundPoint(follow.getH(),0)
 		
 		# Add the game loop procedure to the task manager.
 		self.showbase.taskMgr.add(self.game_loop,"Game Loop")
