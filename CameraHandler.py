@@ -1,7 +1,6 @@
 from direct.showbase import DirectObject 
-from pandac.PandaModules import Vec3,Vec2 
+from pandac.PandaModules import *
 import math 
-from pandac.PandaModules import WindowProperties
 from util import *
 
 # Last modified: 10/2/2009 
@@ -24,14 +23,13 @@ from util import *
 # Sixth mod: Pan limits: I put in variables to use for limiting how far the camera can pan, so the camera can't pan away from the map. These 
 # values will need to be customized to the map, so I added a function for setting them. 
 
-
 class CameraHandler(DirectObject.DirectObject):
 	def __init__(self): 
 		base.disableMouse() 
 		# This disables the default mouse based camera control used by panda. This default control is awkward, and won't be used. 
 
-		base.camera.setPos(0,20,30) 
-		base.camera.lookAt(0,0,0) 
+		base.camera.setPos(0,-35,40) 
+		base.camera.lookAt(0,0,0)
 		# Gives the camera an initial position and rotation. 
 
 		self.mx,self.my=0,0 
@@ -44,7 +42,7 @@ class CameraHandler(DirectObject.DirectObject):
 		self.target=Vec3() 
 		# sets up a vector variable for the camera's target. The target will be the coordinates that the camera is currently focusing on. 
 
-		self.camDist = 55 
+		self.camDist = 60 
 		# A variable that will determine how far the camera is from it's target focus 
 
 		self.panRateDivisor = 10
@@ -55,8 +53,8 @@ class CameraHandler(DirectObject.DirectObject):
 		# This variable controls how close the mouse cursor needs to be to the edge of the screen to start panning the camera. It must be less than 1, 
 		# and I recommend keeping it less than .2 
 
-		self.panLimitsX = Vec2(-20, 20) 
-		self.panLimitsY = Vec2(-20, 20) 
+		self.panLimitsX = Vec2(-110, 110) 
+		self.panLimitsY = Vec2(-110, 110) 
 		# These two vairables will serve as limits for how far the camera can pan, so you don't scroll away from the map.
 
 		self.maxZoomOut = 100
@@ -107,17 +105,35 @@ class CameraHandler(DirectObject.DirectObject):
 		self.accept("arrow_up-up",set_value,[self.keys,"cam-up",0])
 		self.accept("arrow_down-up",set_value,[self.keys,"cam-down",0])
 		
-		self.key_pan_rate=0.35
+		self.key_pan_rate=0.75
 		# pan rate for when user presses the arrow keys
+		
+		# CHESSBOARD STUFF FOR PICKING POINT IN 3D SPACE FROM MOUSE CLICK
+		#Since we are using collision detection to do picking, we set it up like
+		#any other collision detection system with a traverser and a handler
+		self.picker = CollisionTraverser()            #Make a traverser
+		self.pq     = CollisionHandlerQueue()         #Make a handler
+		#Make a collision node for our picker ray
+		self.pickerNode = CollisionNode('mouseRay')
+		#Attach that node to the camera since the ray will need to be positioned
+		#relative to it
+		self.pickerNP = camera.attachNewNode(self.pickerNode)
+		#Everything to be picked will use bit 1. This way if we were doing other
+		#collision we could seperate it
+		self.pickerNode.setFromCollideMask(BitMask32.bit(1))
+		self.pickerRay = CollisionRay()               #Make our ray
+		self.pickerNode.addSolid(self.pickerRay)      #Add it to the collision node
+		#Register the ray as something that can cause collisions
+		self.picker.addCollider(self.pickerNP, self.pq)
+		#self.picker.showCollisions(render)
+		# UNTIL HERE
 
 	def zoomOut(self):
-		print "Zoom Out: " ,self.camDist
 		if(self.camDist <= self.maxZoomOut):
 			self.adjustCamDist(1.1)
 		return True
 
 	def zoomIn(self):
-		print "Zoom In:",self.camDist
 		if(self.camDist >= self.maxZoomIn):
 			self.adjustCamDist(0.9)
 		return True
@@ -329,3 +345,26 @@ class CameraHandler(DirectObject.DirectObject):
 				self.mx=mpos.getX()
 				self.my=mpos.getY()
 				# The old mouse positions are updated to the current mouse position as the final step. 
+	
+	def get_mouse_3d(self):
+		#Set the position of the ray based on the mouse position
+		if base.mouseWatcherNode.hasMouse():
+			mpos = base.mouseWatcherNode.getMouse()
+			self.pickerRay.setFromLens(base.camNode, mpos.getX(), mpos.getY())
+			
+			nearPoint = render.getRelativePoint(camera, self.pickerRay.getOrigin())
+			#Same thing with the direction of the ray
+			nearVec = render.getRelativeVector(camera, self.pickerRay.getDirection())
+			destination=PointAtZ(0, nearPoint, nearVec)
+			return destination
+		return Vec3(-1,-1,-1)
+
+#This function, given a line (vector plus origin point) and a desired z value,
+#will give us the point on the line where the desired z value is what we want.
+#This is how we know where to position an object in 3D space based on a 2D mouse
+#position. It also assumes that we are dragging in the XY plane.
+#
+#This is derived from the mathmatical of a plane, solved for a given point
+def PointAtZ(z, point, vec):
+  return point + vec * ((z-point.getZ()) / vec.getZ())
+# STOLEN FROM CHESSBOARD EXAMPLE

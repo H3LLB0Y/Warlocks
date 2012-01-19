@@ -1,7 +1,7 @@
 class Skybox():
 	def __init__(self,game):
 		# Skybox Setup
-		skyBox=loader.loadModel("skybox/Skybox.egg")
+		skyBox=loader.loadModel("media/skybox/Skybox.egg")
 		skyBox.setBin("background",1)
 		skyBox.setScale(1,1,1)
 		skyBox.setDepthTest(False)

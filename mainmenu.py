@@ -10,7 +10,7 @@ class MainMenu():
 		self.status=OnscreenText(text = "", pos = Vec3(0, -0.35, 0), scale = 0.05, fg = (1, 0, 0, 1), align=TextNode.ACenter, mayChange=True)
 		
 		self.background = OnscreenImage(
-			image  = 'models/newMainmenu.png',
+			image  = 'media/gui/newMainmenu.png',
 			parent = render2d
 		)
 
