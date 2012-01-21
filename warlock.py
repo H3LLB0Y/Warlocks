@@ -21,8 +21,8 @@ class Warlock(Actor):
 		# adjust rotation for this warlock
 		rotation*=(index+1)
 		
-		# set its position 80 units from center and face warlock to center
-		self.setPos(move_forwards(rotation,-80.0))
+		# set its position 10*num_warlocks units from center and face warlock to center
+		self.setPos(move_forwards(rotation,-10.0*num_warlocks))
 		self.setHpr(Vec3(rotation,0,0))
 		
 		# destination (will be flag model or something eventually)
@@ -45,14 +45,24 @@ class Warlock(Actor):
 		# damage taken by warlock affects the friction applied to them, more damage == more slidey
 		self.damage=1
 		
+		# variable to track if warlock is on lava or still on arena
+		self.on_lava=False
+		
 		# hit points of warlock
 		self.hp=100.0
 		
 		# collision sphere for collision detection
-		self.colSphere = CollisionSphere(0, 0, 2.5, 3)
-		self.colNode = self.attachNewNode(CollisionNode('playerNode'))
-		self.colNode.node().addSolid(self.colSphere)
+		#self.colSphere = CollisionSphere(0, 0, 2.5, 3)
+		tube = CollisionTube(0, 0, 1.0, 0, 0, 3.0, 1.25)
+		self.colNode = self.attachNewNode(CollisionNode('warlockTube'+str(index)))
+		self.colNode.node().addSolid(tube)
 		self.colNode.show()
+		
+		self.ray_str='downRay'+str(index)
+		self.down = self.attachNewNode(CollisionNode(self.ray_str))
+		# for some reason when the ray is set to 0,0,1 it causes continuous collisions :S
+		self.down.node().addSolid(CollisionRay(0.1, 0.1, 1.0, 0, 0, -1))
+		self.down.show()
 		
 	# for client to attach ring below clients warlock
 	def attach_ring(self,showbase):
@@ -62,8 +72,8 @@ class Warlock(Actor):
 	def set_destination(self,destination):
 		# set destination of warlock to input
 		self.destination=destination
-		self.destination.setX(clamp(self.destination.getX(),-80,80))
-		self.destination.setY(clamp(self.destination.getY(),-80,80))
+		#self.destination.setX(clamp(self.destination.getX(),-80,80))
+		#self.destination.setY(clamp(self.destination.getY(),-80,80))
 		self.new_destination=True
 		self.dest_node.setPos(self.destination)
 		self.casting=False
@@ -81,6 +91,9 @@ class Warlock(Actor):
 		self.dest_node.setZ(-10)
 		self.new_destination=False
 		self.casting=True
+		
+	def is_on_lava(self,is_on):
+		self.on_lava=is_on
 	
 	# turn warlock to face destination/target
 	def adjust_angle(self,angle,dt):
@@ -156,3 +169,6 @@ class Warlock(Actor):
 		# and spells
 		self.setX(self.getX()+self.spell_vel.getX()*dt)
 		self.setY(self.getY()+self.spell_vel.getY()*dt)
+		
+		if self.on_lava:
+			self.hp-=0.5
