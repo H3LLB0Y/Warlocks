@@ -16,6 +16,8 @@ from game import Game
 
 game_tick=1.0/60.0
 
+num_users=8
+
 class ServerInst():
 	def __init__(self):
 		# Initialise Window
@@ -24,14 +26,24 @@ class ServerInst():
 		# Disable Mouse Control for camera
 		self.showbase.disableMouse()
 		
-		camera.setPos(0,0,350)
-		camera.lookAt(0,0,0)
-		
 		# Start our server up
 		self.server = Server(9099, compress=True)
 		
 		self.users={}
 		
+		for i in range(num_users):
+			new_user={}
+			new_user['name']='cake'
+			new_user['connection']='cake'
+			new_user['ready']=True
+			new_user['new_dest']=False
+			new_user['new_spell']=False
+			self.users[len(self.users)]=new_user
+		
+		camera.setPos(0,0,45*num_users)
+		camera.lookAt(0,0,0)
+		
+		#taskMgr.doMethodLater(0.5, self.pregame_loop, 'Lobby Loop')
 		taskMgr.doMethodLater(0.5, self.lobby_loop, 'Lobby Loop')
 
 	# handles new joining clients and updates all clients of chats and readystatus of players
@@ -63,7 +75,6 @@ class ServerInst():
 								new_user['name']=package[0][1]
 								new_user['connection']=package[1]
 								new_user['ready']=False
-								#new_user['warlock']=self.warlock=Warlock(self.showbase,len(self.users))
 								new_user['new_dest']=False
 								new_user['new_spell']=False
 								self.users[len(self.users)]=new_user
@@ -105,8 +116,8 @@ class ServerInst():
 									self.server.broadcastData(data)
 								# break out of for loop
 								break
-							else:
-								print str(self.users[u]['connection'])+" "+str(package[1])
+							#else:
+							#	print str(self.users[u]['connection'])+" "+str(package[1])
 						if not valid_packet:
 							data = {}
 							data[0] = "error"
@@ -157,11 +168,11 @@ class ServerInst():
 					if len(package)==2:
 						print "Received: " + str(package) +" "+str(package[1])
 						if len(package[0])==2:
-							print "packet right size"
+							#print "packet right size"
 							# else check to make sure connection has username
 							for u in range(len(self.users)):
 								if self.users[u]['connection']==package[1]:
-									print "Packet from "+self.users[u]['name']
+									#print "Packet from "+self.users[u]['name']
 									# process packet
 									# if chat packet
 									if package[0][0]=='destination':
@@ -177,8 +188,8 @@ class ServerInst():
 										self.users[u]['warlock'].set_spell(package[0][1][0],package[0][1][1])
 										self.users[u]['new_spell']=True
 									break
-								else:
-									print "couldnt find connection"+str(self.users[u]['connection'])+" "+str(package[1])
+								#else:
+								#	print "couldnt find connection"+str(self.users[u]['connection'])+" "+str(package[1])
 			# get frame delta time
 			dt=globalClock.getDt()
 			self.game_time+=dt
