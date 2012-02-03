@@ -1,0 +1,87 @@
+<Comment> {
+  "egg-texture-cards -o button_maps.egg -p 105,13 miniMenu_frame.png createAcc_bt.png createAcc_bt_hover.png"
+}
+<Texture> miniMenu_frame {
+  miniMenu_frame.png
+}
+<Texture> createAcc_bt_hover {
+  createAcc_bt_hover.png
+}
+<Texture> createAcc_bt {
+  createAcc_bt.png
+}
+<Group> {
+  <Switch> { 1 }
+  <Scalar> fps { 2 }
+  <VertexPool> vpool {
+    <Vertex> 0 {
+      -1.11429 1.26923 0
+      <UV> { 0 1 }
+    }
+    <Vertex> 1 {
+      -1.11429 -1.26923 0
+      <UV> { 0 0 }
+    }
+    <Vertex> 2 {
+      1.11429 -1.26923 0
+      <UV> { 1 0 }
+    }
+    <Vertex> 3 {
+      1.11429 1.26923 0
+      <UV> { 1 1 }
+    }
+    <Vertex> 4 {
+      -0.5 0.5 0
+      <UV> { 0 1 }
+    }
+    <Vertex> 5 {
+      -0.5 -0.5 0
+      <UV> { 0 0 }
+    }
+    <Vertex> 6 {
+      0.5 -0.5 0
+      <UV> { 1 0 }
+    }
+    <Vertex> 7 {
+      0.5 0.5 0
+      <UV> { 1 1 }
+    }
+    <Vertex> 8 {
+      -0.561905 1 0
+      <UV> { 0 1 }
+    }
+    <Vertex> 9 {
+      -0.561905 -1 0
+      <UV> { 0 0 }
+    }
+    <Vertex> 10 {
+      0.561905 -1 0
+      <UV> { 1 0 }
+    }
+    <Vertex> 11 {
+      0.561905 1 0
+      <UV> { 1 1 }
+    }
+  }
+  <Group> miniMenu_frame {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { miniMenu_frame }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> createAcc_bt {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { createAcc_bt }
+      <VertexRef> { 4 5 6 7 <Ref> { vpool } }
+    }
+  }
+  <Group> createAcc_bt_hover {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { createAcc_bt_hover }
+      <VertexRef> { 8 9 10 11 <Ref> { vpool } }
+    }
+  }
+}

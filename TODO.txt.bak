@@ -1,0 +1,34 @@
+####
+##      TODO
+#    
+#>-------------------->>>
+
+
+
+## H3LLBOY
+
+
+
+
+
+## JMW_87
+
+
+
+
+## MJ-meo-dmt_
+
+Fixed the login.  - Multi users could logon, now it give and error. :)
+ok now.. when a client dc remove the 'user', 'name' from the self.clients{}
+
+Get the client to join a server.
+
+
+you usualy don't forward connections around.
+
+your client connects to the lobby server.
+the client asks the lobbyserver for a list of gameservers.
+then the client picks one and connects to the game server (with a new connection).
+when the game is over the client can disconnect from the gameserver.
+
+you can stay connected to the lobby over the entire time.

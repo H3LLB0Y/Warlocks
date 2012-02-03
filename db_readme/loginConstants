@@ -1,0 +1,17 @@
+##
+#  LOGIN SERVER 
+#  LOBBY SERVER
+##
+
+'login_request' # for first connection. from client.
+'name' # username 
+'connection' # The client ip
+
+
+# Things to move to the gameserver
+'ready' # for game states
+'new_dest' # Distance update
+'new_spell' # spell use/ update
+
+
+
