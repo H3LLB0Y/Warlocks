@@ -1,32 +1,32 @@
-from direct.showbase.ShowBase import Plane, ShowBase, Vec3, Point3, CardMaker
-
-class YourClass(ShowBase):
-  def __init__(self):
-    ShowBase.__init__(self)
-    self.disableMouse()
-    self.camera.setPos(0, 60, 25)
-    self.camera.lookAt(0, 0, 0)
-    z = 0
-    self.plane = Plane(Vec3(0, 0, 1), Point3(0, 0, z))
-    self.model = loader.loadModel("jack")
-    self.model.reparentTo(render)
-    cm = CardMaker("blah")
-    cm.setFrame(-100, 100, -100, 100)
-    render.attachNewNode(cm.generate()).lookAt(0, 0, -1)
-    taskMgr.add(self.__getMousePos, "_YourClass__getMousePos")
+import direct.directbase.DirectStart
+from direct.gui.OnscreenText import OnscreenText 
+from direct.gui.DirectGui import *
+from direct.task import Task
+from direct.actor import Actor
+from direct.interval.IntervalGlobal import *
+from pandac.PandaModules import *
  
-  def __getMousePos(self, task):
-    if base.mouseWatcherNode.hasMouse():
-      mpos = base.mouseWatcherNode.getMouse()
-      pos3d = Point3()
-      nearPoint = Point3()
-      farPoint = Point3()
-      base.camLens.extrude(mpos, nearPoint, farPoint)
-      if self.plane.intersectsLine(pos3d,
-          render.getRelativePoint(camera, nearPoint),
-          render.getRelativePoint(camera, farPoint)):
-        print "Mouse ray intersects ground plane at ", pos3d
-        self.model.setPos(render, pos3d)
-    return task.again
-
-YourClass();base.taskMgr.run()
+#add some text
+bk_text = "DirectDialog- YesNoDialog Demo"
+textObject = OnscreenText(text = bk_text, pos = (0.85,0.85), 
+scale = 0.07,fg=(1,0.5,0.5,1),align=TextNode.ACenter,mayChange=1)
+ 
+#add some text
+output = ""
+textObject = OnscreenText(text = output, pos = (0.95,-0.95),
+ scale = 0.07,fg=(1,0.5,0.5,1),align=TextNode.ACenter,mayChange=1)
+ 
+#callback function to set  text 
+def itemSel(arg):
+	if(arg):
+		output = "Button Selected is: Yes"
+	else:
+		output = "Button Selected is: No"
+	textObject.setText(output)
+ 
+#create a frame
+dialog = YesNoDialog(dialogName="YesNoCancelDialog", text="Please choose:", command=itemSel)
+ 
+base.camera.setPos(0,-20,0)
+#run the tutorial
+run()

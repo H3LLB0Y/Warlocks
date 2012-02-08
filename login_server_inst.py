@@ -29,25 +29,18 @@ from game import Game
 game_tick=1.0/60.0
 
 class LoginInst():
-	def __init__(self):
-		# Initialise Window
-		
+	def __init__(self):		
 		# Dont need window.
 		self.showbase=ShowBase()
-		
-		# Disable Mouse Control for camera
-		self.showbase.disableMouse()
-		
-		#camera.setPos(0,0,350)
-		#camera.lookAt(0,0,0)
 		
 		# Start our server up
 		print ""
 		print "INIT: LOGIN SERVER...\n"
 		self.LoginServer = LoginServer(9098, compress=True)
+		print "INIT: DATABASE...\n"
 		self.db = DataBase()
 		self.users=self.LoginServer.clients
-
+		print self.users, "HERE !!!!!!!!!"
 		
 		taskMgr.doMethodLater(0.2, self.lobby_loop, 'Lobby Loop')
 
@@ -56,7 +49,7 @@ class LoginInst():
 		# if in lobby state
 		temp=self.LoginServer.getData()
 		if temp!=[]:
-			
+			print temp
 			for i in range(len(temp)):
 				valid_packet=False
 				package=temp[i]

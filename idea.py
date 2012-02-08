@@ -13,7 +13,7 @@ maak n system wat die hosted games laat oppop langs die kant.  soos a desktop.
 
 # Class to handle the lobby and gameHosts at same time...
 # mini popup in game list, user click join and client connects to that game via ip, hostName.
-# Instance to make that will fit self.hostList = LiceGames(self)
+# Instance to make that will fit self.hostList = LiveGames(self)
 class LiveGames:
     
         def __init__(self, state):

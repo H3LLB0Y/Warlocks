@@ -2,7 +2,6 @@ from direct.actor.Actor import Actor
 from pandac.PandaModules import *
 from util import *
 from panda3d.bullet import *
-from bitmasks import *
 
 class SpellInst():
 	def __init__(self,spell,caster,pos,rot,worldNP,bullet):

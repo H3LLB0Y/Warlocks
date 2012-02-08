@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# This is my eDIT edit more This is even more of a edit..
+
 from pandac.PandaModules import QueuedConnectionManager, QueuedConnectionListener
 from pandac.PandaModules import QueuedConnectionReader, ConnectionWriter
 from direct.distributed.PyDatagram import PyDatagram
@@ -73,15 +73,6 @@ class Client:
 
 	def getData(self):
 		data = []
-		while self.cReader.dataAvailable():
-			datagram = NetDatagram()  # catch the incoming data in this instance
-			# Check the return value; if we were threaded, someone else could have
-			# snagged this data before we did
-			if self.cReader.getData(datagram):
-				data.append(self.processData(datagram))
-		return data
-
-	def appendData(self,data):
 		while self.cReader.dataAvailable():
 			datagram = NetDatagram()  # catch the incoming data in this instance
 			# Check the return value; if we were threaded, someone else could have

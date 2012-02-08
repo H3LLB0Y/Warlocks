@@ -22,3 +22,6 @@
 # OS generated files #
 ######################
 
+# WinMerge files #
+##################
+*.bak

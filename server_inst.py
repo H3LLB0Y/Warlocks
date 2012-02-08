@@ -11,12 +11,15 @@ from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 from pandac.PandaModules import *
 
+from db import DataBase
 from server import Server
 from game import Game
+from spell							import Spell
+from spellmanager					import SpellManager
 
 game_tick=1.0/60.0
 
-num_users=8
+num_users=5
 
 class ServerInst():
 	def __init__(self):
@@ -28,9 +31,9 @@ class ServerInst():
 		
 		# Start our server up
 		self.server = Server(9099, compress=True)
-		
-		self.users={}
-		
+		self.db = DataBase()
+		self.users={} # We should send the clients from the lobby to here somehow? or just get it from somewhere...
+
 		for i in range(num_users):
 			new_user={}
 			new_user['name']='cake'
@@ -43,12 +46,45 @@ class ServerInst():
 		camera.setPos(0,0,45*num_users)
 		camera.lookAt(0,0,0)
 		
-		#taskMgr.doMethodLater(0.5, self.pregame_loop, 'Lobby Loop')
-		taskMgr.doMethodLater(0.5, self.lobby_loop, 'Lobby Loop')
+		taskMgr.doMethodLater(0.5, self.pregame_loop, 'Lobby Loop')
+		#taskMgr.doMethodLater(0.5, self.lobby_loop, 'Lobby Loop')
 
-	# handles new joining clients and updates all clients of chats and readystatus of players
-	def lobby_loop(self,task):
-		# if in lobby state
+		#if newGame == True:
+			# Lets make something that instances the gameServer class for everything game thats hosted?
+			
+		#taskMgr.doMethodLater(0.5, self.login_loop, 'Login Loop') # Probly start the game then
+		
+		# FROM HERE WILL GO TO GAME SERVER>>>
+	def pregame_loop(self,task):
+		"""# Guess all of this should move after the if.
+		#print "Pregame State"
+		if self.server.getClients():
+			self.game_time=0
+			self.tick=0
+			self.game=Game(len(self.users),game_tick,self.showbase)
+			temp=self.server.getData()
+			print temp
+			if temp!=[]:
+				for i in range(len(temp)):
+					valid_packet=False
+					package=temp[i]
+					if len(package)==2:
+						print "Received: "+str(package)+" "+str(package[1])
+						if len(package[0])==2:
+							print "Packet right size"
+							for u in range(len(self.users)):
+								self.users[u]['warlock']=self.game.warlock[u]
+								if self.users[u]['connection']==package[1]:
+									print "Packet from "+self.users[u]['name']
+									if package[0][0]=='ready':
+										print "So i got the ready and im in game state"
+										taskMgr.doMethodLater(0.5, self.game_loop, 'Game Loop')
+										return task.done
+									else:
+										print "well i didnt get shit"
+		return task.again
+		"""
+		# if in pregame state
 		temp=self.server.getData()
 		if temp!=[]:
 			for i in range(len(temp)):
@@ -141,22 +177,84 @@ class ServerInst():
 			data[0]='state'
 			data[1]='game'
 			self.server.broadcastData(data)
-			taskMgr.doMethodLater(0.5, self.pregame_loop, 'Pregame Loop')
+			taskMgr.doMethodLater(0.5, self.preround_loop, 'Preround Loop')
 			return task.done
 		return task.again
 		
-	def pregame_loop(self,task):
-		print "Pregame State"
+	def preround_loop(self,task):
+		print "Preround State"
 		self.game_time=0
 		self.tick=0
-		self.game=Game(len(self.users),game_tick,self.showbase)
-		for u in range(len(self.users)):
+		self.showbase.num_warlocks=len(self.users)
+		
+		# i guess this shit should be in the pregame part, so people can choose their spells based of these
+		# also it will need to be created in there from data passed from the server (where it will be procedurally generated)
+		# spell0
+		spell0=Spell()
+		
+		spell0.damage=10
+		spell0.target_knockback=20
+		spell0.self_knockback=0
+		spell0.range=25
+		spell0.speed=15
+		spell0.aoe=False
+		spell0.aoe_range=0
+		spell0.targeting=False
+		spell0.casting_time=0
+		spell0.interruptable=False
+		spell0.model="media/spells/blockyball"
+		
+		# spell1
+		spell1=Spell()
+		
+		spell1.damage=25
+		spell1.target_knockback=10
+		spell1.self_knockback=0
+		spell1.range=50
+		spell1.speed=25
+		spell1.aoe=False
+		spell1.aoe_range=0
+		spell1.targeting=False
+		spell1.casting_time=0
+		spell1.interruptable=False
+		spell1.model="media/spells/pointyball"
+		
+		# spell2
+		spell2=Spell()
+		
+		spell2.damage=50
+		spell2.target_knockback=10
+		spell2.self_knockback=30
+		spell2.range=50
+		spell2.speed=15
+		spell2.aoe=False
+		spell2.aoe_range=0
+		spell2.targeting=False
+		spell2.casting_time=0
+		spell2.interruptable=False
+		spell2.model="media/spells/blockyball"
+		
+		# spell3
+		spell3=Spell()
+		
+		spell3.model="media/spells/pointyball"
+		
+		# maybe this shit too, or this can stay here and just pass in an array of spells 
+		self.showbase.spell_man=SpellManager(self.showbase.num_warlocks) # until the Game() class is created in here which i think it should
+		self.showbase.spell_man.add_spell(spell0)
+		self.showbase.spell_man.add_spell(spell1)
+		self.showbase.spell_man.add_spell(spell2)
+		self.showbase.spell_man.add_spell(spell3)
+		
+		self.game=Game(self.showbase,game_tick)
+		for u in range(self.showbase.num_warlocks):
 			self.users[u]['warlock']=self.game.warlock[u]
 		taskMgr.doMethodLater(0.5, self.game_loop, 'Game Loop')
 		return task.done
 		#return task.again
-		
+	
 	def game_loop(self,task):
+		#print "Game State"
 		# if there is any clients connected
 		if self.server.getClients():
 			# process incoming packages
@@ -172,7 +270,7 @@ class ServerInst():
 							# else check to make sure connection has username
 							for u in range(len(self.users)):
 								if self.users[u]['connection']==package[1]:
-									#print "Packet from "+self.users[u]['name']
+									print "Packet from "+self.users[u]['name']
 									# process packet
 									# if chat packet
 									if package[0][0]=='destination':
@@ -197,7 +295,7 @@ class ServerInst():
 			# tick out for clients
 			if (self.game_time>game_tick):
 				# update all clients with new info before saying tick
-				for u in range(len(self.users)):
+				for u in range(self.showbase.num_warlocks):
 					# new warlock destinations
 					if self.users[u]['new_dest']:
 						data = {}
@@ -225,10 +323,11 @@ class ServerInst():
 				self.game_time-=game_tick
 				self.tick+=1
 				# run simulation
-				self.game.run_tick()
+				if not self.game.run_tick():
+					print 'Game Over'
 			return task.cont
 		else:
-			taskMgr.doMethodLater(0.5, self.lobby_loop, 'Lobby Loop')
+			#taskMgr.doMethodLater(0.5, self.lobby_loop, 'Lobby Loop')
 			return task.done
 
 si = ServerInst()

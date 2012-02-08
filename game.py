@@ -1,66 +1,69 @@
 from warlock						import Warlock
 from world							import World
+from spellmanager					import SpellManager
 from pandac.PandaModules import *
+from panda3d.bullet import *
 
 class Game():
-	def __init__(self,num_warlocks,tick_time,showbase):
+	def __init__(self,showbase,tick_time):
 		self.tick_time=tick_time
-		self.num_warlocks=num_warlocks
+		self.num_warlocks=showbase.num_warlocks
 		
-		# Create a traverser that Panda3D will automatically use every frame.
-		base.cTrav=CollisionTraverser()
-		# Initialize the handler for the events.
-		self.collHandEvent = CollisionHandlerEvent()
-		self.collHandEvent.addInPattern('%fn-into-%in')
-		self.collHandEvent.addAgainPattern('%fn-again-%in')
-		self.collHandEvent.addOutPattern('%fn-out-%in')
+		# Bullet shit
+		self.worldNP = render.attachNewNode('World')
+
+		# World
+		self.debugNP = self.worldNP.attachNewNode(BulletDebugNode('Debug'))
+		self.debugNP.show()
+		self.debugNP.node().showWireframe(True)
+		self.debugNP.node().showConstraints(True)
+		self.debugNP.node().showBoundingBoxes(False)
+		self.debugNP.node().showNormals(True)
+
+		self.debugNP.showTightBounds()
+		self.debugNP.showBounds()
+
+		self.bulletworld = BulletWorld()
+		self.bulletworld.setGravity(Vec3(0, 0, 0))# -9.81))
+		self.bulletworld.setDebugNode(self.debugNP.node())
 		
-		# Define a few bitmasks for use.
-		warlockWorldMask = BitMask32(0x1) # for collisions between the warlocks down rays and the world polygons
-		warlockMask = BitMask32(0x2) # for collisions between the warlocks down rays and the world polygons
+		self.world=World(showbase,self.num_warlocks,self.worldNP,self.bulletworld)
 		
-		self.world=World(showbase,num_warlocks)
-		self.world.n_col.node().setIntoCollideMask(warlockWorldMask)
-		
-		self.world_warlock_str={}
-		
+		self.warlocks={}
 		self.warlock={}
 		for u in range(self.num_warlocks):
-			self.warlock[u]=Warlock(showbase,u,self.num_warlocks)
-			self.warlock[u].down.node().setFromCollideMask(warlockWorldMask)
-			self.warlock[u].colNode.node().setCollideMask(warlockMask)
-			base.cTrav.addCollider(self.warlock[u].down,self.collHandEvent)
-			showbase.accept(self.warlock[u].ray_str+'-out-'+'world_col',self.on_lava)
-			showbase.accept(self.warlock[u].ray_str+'-into-'+'world_col',self.off_lava)
-			# build a dictionary (kind of a map i guess, the name of the collNode is the key, warlock is the data) for comparison with the collision entry 
-			self.world_warlock_str[u]={}
-			self.world_warlock_str[u][0]=self.warlock[u].ray_str
-			self.world_warlock_str[u][1]=self.warlock[u]
-		
-		base.cTrav.showCollisions(render)
+			self.warlock[u]=Warlock(showbase,u,self.num_warlocks,self.worldNP,self.bulletworld)
+			self.warlocks[u]={}
+			self.warlocks[u][0]=self.warlock[u].collNP.getName()
+			self.warlocks[u][1]=self.warlock[u]
+	
+		# spell manager setup in pregame state (receive the spells from the server)
+		self.spell_man=showbase.spell_man
 		
 		self.ticks=0
 		
 	def run_tick(self):
-		# here implement some kind of sliding phyiscs based on damage taken already
-		# so heaps of damage means they keep sliding longer less friction
+		not_dead=0
+		
+		# run each of the warlocks simulations
 		for u in range(self.num_warlocks):
-			self.warlock[u].update(self.tick_time)
-		# implement game loop so its same code for server and client
-		# receive updates to warlock and move him
+			if not self.warlock[u].dead:
+				self.warlock[u].update(self.tick_time,self.bulletworld,self.spell_man,self.worldNP,self.warlocks)
+				not_dead+=1
+			# inside here the casting of spells happens, then once the spell manager takes control of the spell the rest will happen from it after this step
+		
+		if not_dead==0:
+			return False
+		
+		# run the spells
+		self.spell_man.update(self.tick_time,self.warlocks,self.bulletworld)
+		
+		# run physics (just updates the collisionNP's i think so collision detections can work)
+		self.bulletworld.doPhysics(self.tick_time,1)
 		
 		self.ticks+=1
+		
 		# raise the lava
 		self.world.raise_lava()
 		
-	def off_lava(self, collEntry):
-		for u in range(self.num_warlocks):
-			if self.world_warlock_str[u][0]==collEntry.getFromNodePath().getName():
-				print "Warlock "+str(u)+' is off lava'
-				self.world_warlock_str[u][1].is_on_lava(False)
-	
-	def on_lava(self, collEntry):
-		for u in range(self.num_warlocks):
-			if self.world_warlock_str[u][0]==collEntry.getFromNodePath().getName():
-				print "Warlock "+str(u)+' is on lava'
-				self.world_warlock_str[u][1].is_on_lava(True)
+		return True
