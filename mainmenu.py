@@ -23,6 +23,8 @@ class MainMenu():
 		)
 
 		self.ip = "127.0.0.1" # Should make this write to file... so that the user can save ip's...
+		# yep thats a good idea, there will be a few things i guess that need to be done like this
+		# like settings and keys and whatnot
 
 		self.buttons = []
 		# Buttons
@@ -49,6 +51,32 @@ class MainMenu():
 		)
 		
 		self.addButton("QUIT!",  game.quit,1, -.5)
+		
+		# need to add the chat stuff
+		# i guess have like a chat manager which will hold an array of 'chat_instances'
+		# and the chat manager can sort out which is displayed and which channel the text is sent from/received to
+		# a bit more thinking needs to be done i guess
+		# can discuss sometime (not really that important now :P)
+		
+		# also i guess the layout and shit will need to be sorted (for whoever is doing the designing)
+		
+		# current games list (need to implement this)
+		# it should send a query to the master server to get the current list (just ip's atmo i guess)
+		# query should be sent on __init__() i.e. here :P and when refresh button is pressed (maybe instead on auto time)
+		# have a time limit on wait before new refresh is requested
+		# setup a task to listen for games (on refresh and once received task.done it)
+		# still something that needs to be decided on how it will work
+		# when one is clicked on and selected it should be tracked so when the refresh happens it still is selected
+		
+		# options shit aswell needs to be sorted
+		# maybe just an overlay or something
+		
+		# functionality for the host button (popup an overlay that will be able to set options and then 'start_game' button
+		# then should auto connect and go to lobby (will be same as for all clients, except have a couple of different buttons i guess)
+		# close game instead of disconnect, start game instead of ready (greyed until all others are ready), kick button i suppose
+		
+		# once the options are set the 'server_inst' should be started on the local computer (which will broadcast to master server, once host can successfully connect)
+		# then game client will move to pregame state (connect to the server, and wait for others and ready)
 
 	def join_chat(self):
 		pass

@@ -16,7 +16,14 @@ class Pregame():
 		self.showbase.num_warlocks=1
 		self.showbase.which=0
 		
+		# this will have its own chat i guess, just game server only (no channels or anything just the one chat, all to all)
+		# also i guess all the players data (usernames, maybe others) will need to be collected here from the server for the chat/scoreboard/whatever
+		# and whenever a new person joins/leaves an update will be sent to all the clients (like with the all chat i guess)
 		# these will need to be created in here from data passed from the server (where it will be procedurally generated)
+		
+		# once it receives a 'preround' state change it should create all the required shit (warlocks per person and the Game() class and whatnot)
+		# then client will switch to preround state
+		
 		# spell0
 		spell0=Spell()
 		
@@ -74,7 +81,7 @@ class Pregame():
 		showbase.spells.append(spell3)
 		
 		self.background = OnscreenImage(
-			image  = 'media/gui/lobby.jpg',
+			image  = 'media/gui/lobby/lobby.png',
 			parent = render2d
 		)
 		

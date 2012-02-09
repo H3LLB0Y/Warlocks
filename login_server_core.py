@@ -124,10 +124,8 @@ class LoginServer:
 		clientCon = datagram.getConnection() # This is the connection data. used to send the shit.
 		package=self.processData(datagram)
 		print "SERVER: ",package
-		print "SERVER: This is the package: ", package
 		valid_packet=False
 		if len(package)==2:
-			print "Received: " + str(package) +" "+ str(clientIp)
 			# if login request is send reply
 			# Should add a checker like in the db something like isLogged(0 or 1)
 			# If found then say no for client

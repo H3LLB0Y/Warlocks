@@ -11,29 +11,21 @@ from direct.showbase.DirectObject import DirectObject
 class Preround():
 	# Initialisation Function
 	def __init__(self,showbase):
-		# Initialise Window
-		#self.showbase=showbase
-		showbase.begin_round()
+		self.showbase=showbase
 		
 		# Add the game loop procedure to the task manager.
-		#taskMgr.doMethodLater(0.5, self.pregame_loop,"Pregame Loop")
+		taskMgr.doMethodLater(2.5, self.pregame_loop,"Pregame Loop")
 		
 	# Game Loop Procedure
 	def pregame_loop(self,task):
+		self.showbase.begin_round()
+		return task.done
+		
+		# needs to check for a 'tick' like packet that will signal to go to the round stage
 		
 		# Return cont to run task again next frame
 		return task.again
-	
-	def printTask(self, task):
-		# Print results
-		print "Received: " + str(self.showbase.client.getData())
-		print "Connected: " + str(self.showbase.client.getConnected())
 
-		# Setup data to send to the server
-		data = {}
-		data["test"] = "test"
-
-		# Send data to the server
-		self.showbase.client.sendData(data)
-
-		return Task.again
+	def hide(self):
+		# hide whatever is created for this (icons and shit for spells) selection buttons w/e else
+		pass

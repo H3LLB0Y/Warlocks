@@ -12,7 +12,7 @@ class SpellInst():
 		
 		shape=BulletSphereShape(0.666)
 		self.collNP=worldNP.attachNewNode(BulletGhostNode('SpellSphere'))
-		self.collNP.setCollideMask(NOTARENA)
+		self.collNP.setCollideMask(BitMask32.allOn())
 		self.collNP.node().addShape(shape)
 		self.collNP.setPos(pos+move_forwards(rot,1.0))
 		self.collNP.setHpr(Vec3(rot,0,0))
