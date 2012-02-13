@@ -15,7 +15,7 @@ from util							import *
 from game							import Game
 from spellmanager					import SpellManager
 
-game_tick=1.0/60.0
+game_tick=1.0/30.0
 
 class Round():
 	# Initialisation Function
@@ -39,11 +39,6 @@ class Round():
 		self.skybox=Skybox(self.showbase)
 		
 		self.ch=CameraHandler()
-		
-		# maybe this shit too, or this can stay here and just pass in an array of spells 
-		self.showbase.spell_man=SpellManager(self.showbase.num_warlocks) # until the Game() class is created in here which i think it should
-		for i in self.showbase.spells:
-			self.showbase.spell_man.add_spell(i)
 		
 		self.game=Game(self.showbase,game_tick)
 			
@@ -78,6 +73,12 @@ class Round():
 		follow=self.warlock.model
 		self.ch.setTarget(follow.getPos().getX(),follow.getPos().getY(),follow.getPos().getZ())
 		self.ch.turnCameraAroundPoint(follow.getH(),0)
+		
+		# send loading completion packet to the game server
+		data = {}
+		data[0]='round'
+		data[1]='sync'
+		self.showbase.client.sendData(data)
 		
 		# Add the game loop procedure to the task manager.
 		self.showbase.taskMgr.add(self.game_loop,"Game Loop")

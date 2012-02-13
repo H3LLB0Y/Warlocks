@@ -20,7 +20,6 @@ from pandac.PandaModules import *
 
 from db import DataBase
 from login_server_core import LoginServer
-from game import Game
 
 # LOGIN OPCODES
 # We can add them later.
@@ -49,19 +48,17 @@ class LoginInst():
 		# if in lobby state
 		temp=self.LoginServer.getData()
 		if temp!=[]:
-			print temp
+			#print temp
 			for i in range(len(temp)):
 				valid_packet=False
 				package=temp[i]
 				if len(package)==2:
-					print "Received: " + str(package) +" "+ str(package[1].getAddress())
+					#print "Received: " + str(package) +" "+ str(package[1].getAddress())
 					if len(package[0])==2:
 						for u in range(len(self.users)):
 							if self.users[u]['connection']==package[1]:
-								print self.users
+								#print self.users
 								print "Packet from "+self.users[u]['name']
-								# process packet
-								update_warlocks=False
 								# if chat packet
 								if package[0][0]=='chat':
 									print "Chat: "+package[0][1]
@@ -72,26 +69,20 @@ class LoginInst():
 									data[1]=self.users[u]['name']+": "+package[0][1]
 									self.LoginServer.broadcastData(data)
 								# else if ready packet
-								elif package[0][0]=='ready':
-									print self.users[u]['name']+" is ready!"
-									self.users[u]['ready']=True
-									valid_packet=True
-									update_warlocks=True
-								# else if unready packet
-								elif package[0][0]=='unready':
-									print self.users[u]['name']+" is not ready!"
-									self.users[u]['ready']=False
-									valid_packet=True
-									update_warlocks=True
-								if update_warlocks:
+								elif package[0][0]=='server_query':
+									for s in self.LoginServer.active_servers:
+										data = {}
+										data[0] = "server"
+										data[1] = str(s[1])
+										self.LoginServer.sendData(data,package[1])
 									data = {}
-									data[0]='warlocks'
-									data[1]=len(self.users)
-									self.LoginServer.broadcastData(data)
-								# break out of for loop
-								break
+									data[0] = "final"
+									data[1] = "No more servers"
+									self.LoginServer.sendData(data, package[1])
+									valid_packet=True
 							else:
-								print str(self.users[u]['connection'])+" "+str(package[1])
+								print 'packet from server'
+								#print str(self.users[u]['connection'])+" "+str(package[1])
 						if not valid_packet:
 							data = {}
 							data[0] = "error"
@@ -102,36 +93,7 @@ class LoginInst():
 						print "Data in packet wrong size"
 				else:
 					print "Packet wrong size"
-		# if all players are ready and there is X of them
-		game_ready=True
-		# if there is any clients connected
-		if not self.LoginServer.getClients():
-			game_ready=False
-		for u in range(len(self.users)):
-			if self.users[u]['ready']==False:
-				game_ready=False
-		if game_ready:
-			data = {}
-			data[0]='state'
-			data[1]='game'
-			self.LoginServer.broadcastData(data)
-			#taskMgr.doMethodLater(0.5, self.pregame_loop, 'Pregame Loop')
-			return task.done
 		return task.again
-	
-	# this will be moved onto the game server itself (as a pregame wait until full/enough peeps and everyone to ready)
-	def pregame_loop(self,task):
-		print "Pregame State"
-		self.game_time=0
-		self.tick=0
-		self.game=Game(len(self.users),game_tick,self.showbase)
-		for u in range(len(self.users)):
-			self.users[u]['warlock']=self.game.warlock[u]
-		taskMgr.doMethodLater(0.5, self.game_loop, 'Game Loop')
-		return task.done
-		
-		# FROM HERE WILL GO TO GAME SERVER>>>
-		#return task.again
 		
 ls = LoginInst()
 run()

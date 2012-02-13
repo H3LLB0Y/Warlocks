@@ -8,7 +8,7 @@ class SpellInst():
 		self.spell=spell
 		self.caster=caster
 		# Load spell model
-		self.model=Actor(spell.model)
+		self.model=Actor(spell.MODELS[spell.model])
 		
 		shape=BulletSphereShape(0.666)
 		self.collNP=worldNP.attachNewNode(BulletGhostNode('SpellSphere'))

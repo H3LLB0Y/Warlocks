@@ -4,8 +4,8 @@ from direct.gui.OnscreenText  import OnscreenText
 from pandac.PandaModules      import *
 
 class MainMenu():
-	def __init__(self, game):
-		self.game=game
+	def __init__(self, showbase):
+		self.showbase=showbase
 		
 		self.status=OnscreenText(text = "", pos = Vec3(0, -0.35, 0), scale = 0.05, fg = (1, 0, 0, 1), align=TextNode.ACenter, mayChange=True)
 		
@@ -25,17 +25,20 @@ class MainMenu():
 		self.ip = "127.0.0.1" # Should make this write to file... so that the user can save ip's...
 		# yep thats a good idea, there will be a few things i guess that need to be done like this
 		# like settings and keys and whatnot
+		
+		self.params=['3','8']
 
 		self.buttons = []
 		# Buttons
 		boxloc = Vec3(0.0, 0.0, 0.0)
 		# Host
 		p = boxloc + Vec3(-0.85, 0, -0.79)
-		self.hostButton = DirectButton(text="Host", pos = p,  scale = 0.048, relief=DGG.GROOVE, command='')
+		self.hostButton = DirectButton(text="Host", pos = p,  scale = 0.048, relief=DGG.GROOVE, command=self.showbase.host_game, extraArgs=[self.params])
+		self.buttons.append(self.hostButton)
 		
-		p = boxloc + Vec3(-0.65, 0, -0.79)
+		p = boxloc + Vec3(-0.60, 0, -0.79)
 		self.joinButton = DirectButton(text="Join", pos=p, scale=0.048, relief=DGG.GROOVE, command=self.join_server)
-		
+		self.buttons.append(self.joinButton)
 		
 		self.addButton("Join Server",  self.join_server,1, -.1)
 		
@@ -50,7 +53,7 @@ class MainMenu():
 			text_align  = TextNode.ACenter,
 		)
 		
-		self.addButton("QUIT!",  game.quit,1, -.5)
+		self.addButton("QUIT!", showbase.quit,1, -.5)
 		
 		# need to add the chat stuff
 		# i guess have like a chat manager which will hold an array of 'chat_instances'
@@ -62,11 +65,22 @@ class MainMenu():
 		
 		# current games list (need to implement this)
 		# it should send a query to the master server to get the current list (just ip's atmo i guess)
-		# query should be sent on __init__() i.e. here :P and when refresh button is pressed (maybe instead on auto time)
+		
 		# have a time limit on wait before new refresh is requested
-		# setup a task to listen for games (on refresh and once received task.done it)
-		# still something that needs to be decided on how it will work
 		# when one is clicked on and selected it should be tracked so when the refresh happens it still is selected
+		self.servers=[]
+		
+		# track selected
+		self.selected_server=False
+		
+		p = boxloc + Vec3(-0.35, 0, -0.79)
+		self.refreshButton = DirectButton(text="Refresh", pos=p, scale=0.048, relief=DGG.GROOVE, command=self.query_servers)
+		# when refresh button is pressed (maybe instead on auto time) send query
+		self.buttons.append(self.refreshButton)
+		
+		self.query=False
+		# query should be sent on __init__() i.e. here :P
+		self.query_servers()
 		
 		# options shit aswell needs to be sorted
 		# maybe just an overlay or something
@@ -77,6 +91,40 @@ class MainMenu():
 		
 		# once the options are set the 'server_inst' should be started on the local computer (which will broadcast to master server, once host can successfully connect)
 		# then game client will move to pregame state (connect to the server, and wait for others and ready)
+	
+	def query_servers(self):
+		if not self.query:
+			self.query=True
+			if self.showbase.client.getConnected():
+				data = {}
+				data[0] = 'server_query'
+				data[1] = 'do we need this here?'
+				self.showbase.client.sendData(data)
+				del self.servers
+				self.servers=[]
+				# Add the handler for the receive stage.
+				taskMgr.doMethodLater(0.25, self.query_receive, 'Receive Servers')
+		
+	# setup a task to listen for games (on refresh and once received task.done it)
+	def query_receive(self,task):
+		temp=self.showbase.client.getData()
+		if temp!=[]:
+			for i in range(len(temp)):
+				valid_packet=False
+				package=temp[i]
+				if len(package)==2:
+					#print "Received: " + str(package)
+					if package[0]=='server':
+						self.servers.append(package[1])
+						valid_packet=True
+					elif package[0]=='final':
+						print 'No more servers'
+						print self.servers
+						self.query=False
+						return task.done
+				else:
+					print "Packet wrong size"
+		return task.again
 
 	def join_chat(self):
 		pass
@@ -90,7 +138,7 @@ class MainMenu():
 	def join_server(self):
 		self.setIp(self.entry.get())
 		self.status.setText("Attempting to join server @ "+self.ip+"...")
-		if self.game.join_server(self.ip):
+		if self.showbase.join_server(self.ip):
 			self.status.setText("")
 		else:
 			self.status.setText("Could not Connect...")

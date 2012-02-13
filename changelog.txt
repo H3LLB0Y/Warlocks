@@ -1,0 +1,85 @@
+Changelog for WARLOCK [ARENA]
+
+# I guess newer versions will be added on top so no scrolling to see recent stuff
+
+Version:	0.0.0
+Author:	H3LLB0Y
+Date:		13/02/2012
+
+game.py
+-	Added creation of SpellManager here, (client) adds spells created in pregame loading state, (server) spells created in __init__
+
+login_server_core.py
+-	Changed auth() function, gave it a boolean return type (true for succesful client auth, false otherwise)
+-	Added Server authentication part to auth function, also in auth function is some code for request of auth from game servers (i suppose this could be moved to a server handling section on the auth server)
+
+login_server_inst.py
+-	removed Game import (unneccesary)
+-	silenced lots of the printing --'
+-	added support for a server listing request from clients (sends back a list of ip's and then a 'final' packet)
+-	removed some unneccesary packet handlers (originally from game server code)
+-	and some other original game server code for moving to next state
+-	and the pregame_loop code
+
+main.py
+-	added spell import, due to the pregame loading task receiving the spells from the server here, could move this into the pregame.py file, but it should be outside the Pregame class
+-	added import for subprocess, for hosting this allows for the server to be called from inside the game (at the moment it starts over the top rather than in the background, something to look into, maybe panda side code to make it not take focus or something in subprocess)
+-	removed unneccesary state changing tasks, just destroying and creating before ending previous state task is enough
+-	added a pregame packetReader (like a loading stage, receives the data from server), which waits for authentication and then processes the data from server for spells, other clients, etc
+-	added host_game() function which takes params, at the moment is called inside mainmenu state when host button is pressed, will need to be called after the gui with server options is filled out and 'start server' button is pressed, will need to call this function with the required parameters still to be set up
+
+mainmenu.py
+-	corrected self.game to self.showbase, fixed all references in file, showbase is the main class for the server, used for passing around data between states
+-	added params for the host button and setup the 'host' button to start the server on press
+-	added all 3 extra buttons (host/join/refresh) to buttons array so they are hidden on state change
+-	added the refresh button, to refresh the current servers list, and a call to the query function in the __init__
+-	added query_servers() function to request from the main server a list of currently active servers, sends 'server_query' packet and starts the listener
+-	added query_receive() function to listen for response from request, receives and places the ip's into a list, should then call a function to update the gui with these newly acquired ip's
+
+pregame.py
+-	removed spell import and all spell initialisation (it has been moved to pregame loading task)
+-	added a clients array (a dictionary of clients usernames and an index, used in chat at the moment)
+-	changed chat print implementation so it looks up the name of the client and pre-pends it to the chat message
+-	changed 'game' state to 'preround' state for packet handler to move to next state
+
+round.py
+-	halved the current tick rate to 1/30 instead of 1/60
+-	removed SpellManager creation from here (its created before this in the pregame state)
+-	added a 'sync' packet that is sent to server after loading is complete, server will wait for all clients to 'sync' before starting the game loop ticks
+
+server.py
+-	added 'setNoDelay(True)' to all the connections (server listening connection and created clients connections)
+
+server_inst.py
+-	added client import and code for connecting to auth server for 'online' mode, so users will have to be authenticated when they connect
+-	offline mode will be available if it cannot connect to auth server, this will allow any clients and perform no verification (will need to add un-auth mode for clients)
+-	added 'sync' packet support so server will wait for all clients to sync before round begins
+-	added spell initialisation (this will eventually come from main server or a spell server)
+-	cleaned up a bit of code
+-	added validator code (sends request to server on receive of clients username and querys auth server)
+
+spell.py
+-	changed 'model' variable to an int which looks up a dictionary for model location
+-	added send and receive functions for sending spells over the network
+
+spellinst.py
+-	adapted for spell.model variable lookup in dictionary for location
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

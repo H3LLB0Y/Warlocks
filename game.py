@@ -37,8 +37,10 @@ class Game():
 			self.warlocks[u][0]=self.warlock[u].collNP.getName()
 			self.warlocks[u][1]=self.warlock[u]
 	
-		# spell manager setup in pregame state (receive the spells from the server)
-		self.spell_man=showbase.spell_man
+		# spell manager setup in pregame state (receive the spells from the server in pregame loading)
+		self.spell_man=SpellManager(self.num_warlocks)
+		for i in showbase.spells:
+			self.spell_man.add_spell(i)
 		
 		self.ticks=0
 		

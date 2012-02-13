@@ -1,7 +1,7 @@
 from pandac.PandaModules import loadPrcFileData
 loadPrcFileData("",
 """    
-	window-title WARLOCKS
+	window-title WARLOCK [ARENA]
 	fullscreen 0
 	win-size 1024 768
 	cursor-hidden 0
@@ -18,19 +18,31 @@ from pandac.PandaModules      import *
 import sys
 
 from client							import Client
+from spell							import Spell
 
 from login import Login
 from mainmenu import MainMenu
 from pregame import Pregame
 from preround import Preround
 from round import Round
-from client_config import *
+import ConfigParser, os
 
+from subprocess import *
 
 class Main(ShowBase):
 	def __init__(self):
 		self.created_client=False
 		ShowBase.__init__(self)
+		
+		### CONFIG LOADER ###
+		global LOGIN_IP
+		global LOGIN_PORT
+		config = ConfigParser.RawConfigParser()
+		config.read('client.cfg')
+		LOGIN_IP = config.get('SERVER CONNECTION', 'host_ip')
+		LOGIN_PORT = config.getint('SERVER CONNECTION', 'host_port')
+		### CONFIG END ###
+		
 		self.login=Login(self)
 		self.client = Client(LOGIN_IP, LOGIN_PORT, compress=True)
 		if not self.client.getConnected():
@@ -95,8 +107,8 @@ class Main(ShowBase):
 						self.login.updateStatus(package[1][0])
 						print "success: "+str(package[1][1])
 						valid_packet=True
-						print "I should move to main menu now..."
-						taskMgr.doMethodLater(0.3, self.start_mainmenu, 'Start Main Menu')
+						self.login.destroy()
+						self.mainmenu=MainMenu(self)
 						return task.done
 					"""if not valid_packet:
 						data = {}
@@ -107,11 +119,6 @@ class Main(ShowBase):
 				else:
 					print "Packet wrong size"
 		return task.again
-	
-	def start_mainmenu(self,task):
-		self.login.destroy()
-		self.mainmenu=MainMenu(self)
-		return task.done
 		
 	def join_server(self,address):
 		# Store connection to lobby and chat i guess eventually
@@ -119,20 +126,46 @@ class Main(ShowBase):
 		# attempt to connect to the game server
 		self.client = Client(address, 9099, compress=True)
 		if self.client.getConnected():
-			print "Connected to server"
+			print "Connected to server, Awaiting authentication..."
 			data = {}
 			data[0]="username"
 			data[1]=self.username # This will end up being the selected server?
 			self.client.sendData(data)
-			taskMgr.doMethodLater(0.03, self.start_pregame, 'Start Pregame') # I guess this should change to Pregame.
+			self.spells=[]
+			self.clients={}
+			taskMgr.doMethodLater(0.03, self.pregame_packetReader, 'Start Pregame')
 			return True
 		else:
+			print "Couldnt connect to server"
+			self.client=self.lobby_con
 			return False
-		
-	def start_pregame(self,task):
-		self.mainmenu.hide()
-		self.pregame=Pregame(self)
-		return task.done
+	
+	def pregame_packetReader(self, task):
+		temp=self.client.getData()
+		if temp!=[]:
+			for i in range(len(temp)):
+				package=temp[i]
+				if len(package)==2:
+					print "Received: " + str(package)
+					# updates warlocks in game
+					if package[0]=='auth':
+						# if authenticated then receive all the spells and warlocks
+						print 'Authenticated YEAH!!!'
+					elif package[0]=='spell':
+						spell=Spell()
+						spell.receive(package[1])
+						self.spells.append(spell)
+					elif package[0]=='client':
+						self.clients[package[1][0]]=package[1][1]
+						print 'client '+str(package[1][0])+' '+str(package[1][1])
+					elif package[0]=='ready':
+						print "Moving to pregame"
+						self.mainmenu.hide()
+						self.pregame=Pregame(self,self.clients)
+						return task.done
+				else:
+					print "Packet wrong size"
+		return task.again
 		
 	def begin_preround(self):
 		print "Game Starting"
@@ -154,6 +187,9 @@ class Main(ShowBase):
 	
 	def quit(self):
 		sys.exit()
+		
+	def host_game(self,params):
+		pid = Popen(["python", "server_inst.py", params]).pid
 
 game = Main()
 game.run()

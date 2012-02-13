@@ -39,6 +39,8 @@ class LoginServer:
 		# Temp user dict
 		self.clients={}
 		
+		self.active_servers=[]
+		
 		self.connect(self.port, self.backlog)
 		self.startPolling()
 
@@ -163,19 +165,38 @@ class LoginServer:
 						data[1][0]=self.db.status
 						data[1][1]=len(self.clients)-1 # This is part of the old 'which' packet
 						self.sendData(data, clientCon)
-					
-						# Move client to the self.activeConnections list.
-						self.activeConnections.append(clientCon)
-						print "HERE IS ACTIVE: ", self.activeConnections
-						self.tempConnections.remove(clientCon)
-						print "HERE IS TEMP", self.tempConnections
-					
+						return True
 				else:
 					status = self.db.status
 					data={}
 					data[0]='db_reply'
 					data[1]=status
 					self.sendData(data, clientCon)
+			# if server add it to the list of current active servers
+			if package[0]=='server':
+				valid_packet=True
+				print 'Server connected: '+package[1]
+				print 'From: '+str(datagram.getAddress())
+				server={}
+				server[0]=package[1]
+				server[1]=datagram.getAddress()
+				self.active_servers.append(server)
+			# if authentication from server reply with auth/not auth of username
+			if package[0]=='auth':
+				valid_packet=True
+				client_auth=False
+				print 'Attempting Authentication on: '+package[1]
+				for u in range(len(self.clients)):
+					if self.clients[u]['name']==package[1]:
+						client_auth=True
+						break
+				data = {}
+				if client_auth:
+					data[0] = 'auth'
+				else:
+					data[0] = 'fail'
+				data[1] = self.clients[u]['name']
+				self.sendData(data, clientCon)
 			if not valid_packet:
 				data = {}
 				data[0] = "error"
@@ -193,20 +214,23 @@ class LoginServer:
 			# Check the return value; if we were threaded, someone else could have
 			# snagged this data before we did
 			if self.cReader.getData(datagram):
-				
 				if datagram.getConnection() in self.tempConnections:
 					print "Check Auth!"
-					self.auth(datagram)
+					if self.auth(datagram):
+						# Move client to the self.activeConnections list.
+						self.activeConnections.append(datagram.getConnection())
+						print "HERE IS ACTIVE: ", self.activeConnections
+						self.tempConnections.remove(datagram.getConnection())
+						print "HERE IS TEMP", self.tempConnections
 					print "Auth Done!"
 					# in auth def or after the connection will be moved to self.activeConnections
 					# and then removed from the temp list
 					break
-				# Check if the data rechieved is from a valid client.
+				# Check if the data recieved is from a valid client.
 				elif datagram.getConnection() in self.activeConnections:
 					appendage={}
 					appendage[0]=self.processData(datagram)
 					appendage[1]=datagram.getConnection()
 					data.append(appendage)
-					
 				
 		return data
