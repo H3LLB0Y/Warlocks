@@ -32,12 +32,12 @@ class LoginInst():
 		
 		# Start our server up
 		print ""
-		print "INIT: LOGIN SERVER...\n"
+		print "STARTING LOGIN SERVER\n"
 		self.LoginServer = LoginServer(9098, compress=True)
-		print "INIT: DATABASE...\n"
 		self.db = DataBase()
+		self.db.Db_test()
 		self.users=self.LoginServer.clients
-		print self.users, "HERE !!!!!!!!!"
+		
 		
 		taskMgr.doMethodLater(0.2, self.lobby_loop, 'Lobby Loop')
 
