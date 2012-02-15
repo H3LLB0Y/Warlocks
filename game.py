@@ -13,6 +13,7 @@ class Game():
 		self.worldNP = render.attachNewNode('World')
 
 		# World
+		'''
 		self.debugNP = self.worldNP.attachNewNode(BulletDebugNode('Debug'))
 		self.debugNP.show()
 		self.debugNP.node().showWireframe(True)
@@ -22,10 +23,10 @@ class Game():
 
 		self.debugNP.showTightBounds()
 		self.debugNP.showBounds()
-
+		'''
 		self.bulletworld = BulletWorld()
 		self.bulletworld.setGravity(Vec3(0, 0, 0))# -9.81))
-		self.bulletworld.setDebugNode(self.debugNP.node())
+		#self.bulletworld.setDebugNode(self.debugNP.node())
 		
 		self.world=World(showbase,self.num_warlocks,self.worldNP,self.bulletworld)
 		
