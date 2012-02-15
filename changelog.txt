@@ -5,6 +5,9 @@ Version:	0.0.1
 Author:	H3LLB0Y
 Date:		15/02/2012
 
+db.py
+- 	Added a basic DB tester function, just to see if its available.
+
 login.py
 -	Added imports for ConfigParser and os for configuration file reading
 -	Added client import for creation of client to auth server
@@ -14,6 +17,8 @@ login.py
 
 login_server_inst.py
 -	removed 'game_tick' variable
+-       Added a db tester to the db file.  To check if its available
+- 	Removed some unwanted useless 'prints'.
 
 main.py
 -	Major cleanup of this file, now only shows basic flow code, everything is moved into respective files as it should be
