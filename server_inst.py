@@ -24,7 +24,7 @@ from client_config				import *
 
 game_tick=1.0/30.0
 
-num_users=2
+num_users=0
 
 class ServerInst():
 	def __init__(self):
@@ -69,7 +69,7 @@ class ServerInst():
 				new_user['authenticated']=True
 			self.users[len(self.users)]=new_user
 		
-		camera.setPos(0,0,45*num_users)
+		camera.setPos(0,0,90+45*num_users)
 		camera.lookAt(0,0,0)
 		
 		# get data from spell server
@@ -140,8 +140,10 @@ class ServerInst():
 				if len(package)==2:
 					if package[0]=='auth':
 						print 'User authenticated: '+package[1]
+						new_client=-1
 						for u in range(len(self.users)):
 							if self.users[u]['name']==package[1]:
+								new_client=u
 								self.users[u]['authenticated']=True
 								data = {}
 								data[0] = 'auth'
@@ -160,8 +162,20 @@ class ServerInst():
 									data[1][1]=self.users[c]['name']
 									self.server.sendData(data,self.users[u]['connection'])
 								data = {}
+								data[0] = 'which'
+								data[1] = self.users[u]['which']
+								self.server.sendData(data,self.users[u]['connection'])
+								data = {}
 								data[0] = 'ready'
 								data[1] = self.users[u]['name']
+								self.server.sendData(data,self.users[u]['connection'])
+						for u in range(len(self.users)):
+							if not self.users[u]['name']==package[1]:
+								data = {}
+								data[0] = 'client'
+								data[1] = {}
+								data[1][0]=new_client
+								data[1][1]=self.users[new_client]['name']
 								self.server.sendData(data,self.users[u]['connection'])
 					elif package[0]=='fail':
 						print 'User failed authentication: '+package[1]
@@ -172,34 +186,6 @@ class ServerInst():
 		return task.again
 		
 	def pregame_loop(self,task):
-		"""# Guess all of this should move after the if.
-		#print "Pregame State"
-		if self.server.getClients():
-			self.game_time=0
-			self.tick=0
-			self.game=Game(len(self.users),game_tick,self.showbase)
-			temp=self.server.getData()
-			print temp
-			if temp!=[]:
-				for i in range(len(temp)):
-					valid_packet=False
-					package=temp[i]
-					if len(package)==2:
-						print "Received: "+str(package)+" "+str(package[1])
-						if len(package[0])==2:
-							print "Packet right size"
-							for u in range(len(self.users)):
-								self.users[u]['warlock']=self.game.warlock[u]
-								if self.users[u]['connection']==package[1]:
-									print "Packet from "+self.users[u]['name']
-									if package[0][0]=='ready':
-										print "So i got the ready and im in game state"
-										taskMgr.doMethodLater(0.5, self.game_loop, 'Game Loop')
-										return task.done
-									else:
-										print "well i didnt get shit"
-		return task.again
-		"""
 		# if in pregame state
 		temp=self.server.getData()
 		if temp!=[]:
@@ -312,7 +298,7 @@ class ServerInst():
 		self.game=Game(self.showbase,game_tick)
 		for u in range(self.showbase.num_warlocks):
 			self.users[u]['warlock']=self.game.warlock[u]
-		taskMgr.doMethodLater(2.5, self.round_ready_loop, 'Game Loop')
+		taskMgr.doMethodLater(0.5, self.round_ready_loop, 'Game Loop')
 		return task.done
 		#return task.again
 		

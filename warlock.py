@@ -101,7 +101,7 @@ class Warlock():
 		oldH = self.collNP.getH()
 		targetH = fitDestAngle2Src(oldH,targetH)
 		magnitude = abs(targetH-oldH)+90.0
-		if magnitude>92.5:
+		if magnitude>95.0:
 			if (targetH-oldH)<0:
 				self.collNP.setH((self.collNP.getH()-(magnitude*2.5*dt))%360)
 			else:
@@ -138,11 +138,23 @@ class Warlock():
 			self.damage=1
 		
 		# develocitize the destination velocity (slow it down, will get reset if it is still going to destination
-		self.dest_vel.setX(self.dest_vel.getX()*(1-2.5*dt))
-		self.dest_vel.setY(self.dest_vel.getY()*(1-2.5*dt))
+		if self.dest_vel.length()<1.0:
+			self.dest_vel.setX(0.0)
+			self.dest_vel.setY(0.0)
+		else:
+			minus=VBase3(self.dest_vel)
+			if (minus.normalize()):
+				self.dest_vel.setX(self.dest_vel.getX()-minus.getX())
+				self.dest_vel.setY(self.dest_vel.getY()-minus.getY())
 		# decrease spell velocity (friction)
-		self.spell_vel.setX(self.spell_vel.getX()*(1-1.25*dt*(5.0/self.damage)))
-		self.spell_vel.setY(self.spell_vel.getY()*(1-1.25*dt*(5.0/self.damage)))
+		if self.spell_vel.length()<1.0:
+			self.spell_vel.setX(0)
+			self.spell_vel.setY(0)
+		else:
+			minus=VBase3(self.spell_vel)
+			if (minus.normalize()):
+				self.spell_vel.setX(self.spell_vel.getX()-minus.getX())
+				self.spell_vel.setY(self.spell_vel.getY()-minus.getY())
 		
 		# if spell is being cast
 		if self.casting:

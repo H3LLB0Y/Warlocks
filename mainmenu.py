@@ -3,6 +3,8 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.OnscreenText  import OnscreenText
 from pandac.PandaModules      import *
 
+from client							import Client
+
 class MainMenu():
 	def __init__(self, showbase):
 		self.showbase=showbase
@@ -113,7 +115,7 @@ class MainMenu():
 				valid_packet=False
 				package=temp[i]
 				if len(package)==2:
-					#print "Received: " + str(package)
+					print "Received: " + str(package)
 					if package[0]=='server':
 						self.servers.append(package[1])
 						valid_packet=True
@@ -134,13 +136,26 @@ class MainMenu():
 		# Then the player picks one and it connects via the host name/ip or whatever.
 		# While this is busy happening the client stays connected to the lobby server.
 		
-	# Check here for the blocking.
 	def join_server(self):
 		self.setIp(self.entry.get())
 		self.status.setText("Attempting to join server @ "+self.ip+"...")
-		if self.showbase.join_server(self.ip):
+		# Store connection to lobby and chat i guess eventually
+		self.showbase.lobby_con=self.showbase.client
+		# attempt to connect to the game server
+		self.showbase.client = Client(self.ip, 9099, compress=True)
+		if self.showbase.client.getConnected():
+			print "Connected to server, Awaiting authentication..."
+			data = {}
+			data[0]="username"
+			data[1]=self.showbase.username
+			self.showbase.client.sendData(data)
+			self.showbase.spells=[]
+			self.showbase.clients={}
+			self.showbase.num_warlocks=0
+			self.showbase.start_pregame()
 			self.status.setText("")
 		else:
+			self.showbase.client=self.showbase.lobby_con
 			self.status.setText("Could not Connect...")
 
 	def addButton(self, text, command,xPos, zPos):

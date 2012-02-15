@@ -28,7 +28,6 @@ class Server:
 	def connect(self, port, backlog=1000):
 		# Bind to our socket
 		tcpSocket = self.cManager.openTCPServerRendezvous(port, backlog)
-		tcpSocket.setNoDelay(True)
 		self.cListener.addConnection(tcpSocket)
 
 	def startPolling(self):

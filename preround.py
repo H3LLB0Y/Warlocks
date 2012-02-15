@@ -14,11 +14,11 @@ class Preround():
 		self.showbase=showbase
 		
 		# Add the game loop procedure to the task manager.
-		taskMgr.doMethodLater(2.5, self.pregame_loop,"Pregame Loop")
+		taskMgr.doMethodLater(0.5, self.pregame_loop,"Pregame Loop")
 		
 	# Game Loop Procedure
 	def pregame_loop(self,task):
-		self.showbase.begin_round()
+		self.showbase.start_round()
 		return task.done
 		
 		# needs to check for a 'tick' like packet that will signal to go to the round stage

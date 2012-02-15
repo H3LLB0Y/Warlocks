@@ -25,3 +25,7 @@
 # WinMerge files #
 ##################
 *.bak
+
+# Random test file #
+####################
+test.py

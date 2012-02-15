@@ -25,8 +25,6 @@ from login_server_core import LoginServer
 # We can add them later.
 # like: LOGIN_REQUEST = 0x00
 
-game_tick=1.0/60.0
-
 class LoginInst():
 	def __init__(self):		
 		# Dont need window.
@@ -71,6 +69,7 @@ class LoginInst():
 								# else if ready packet
 								elif package[0][0]=='server_query':
 									for s in self.LoginServer.active_servers:
+										print 'server: '+str(s[1])
 										data = {}
 										data[0] = "server"
 										data[1] = str(s[1])

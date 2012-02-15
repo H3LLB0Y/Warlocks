@@ -3,21 +3,17 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.OnscreenText  import OnscreenText
 from pandac.PandaModules      import *
 
+from spell							import Spell
 from spellmanager					import SpellManager
 
 # This should get a new name something like pregame, or the codes should move.
 class Pregame():
-	def __init__(self, showbase, clients):
+	def __init__(self, showbase):
 		# prior to actually moving to this state a 'loading' state will happen
 		# receiving the spells data from server and player data and shit
 		self.showbase=showbase
 		
 		self.ready=False
-		
-		self.showbase.num_warlocks=1
-		self.showbase.which=0
-		
-		self.clients=clients
 		
 		# this will have its own chat i guess, just game server only (no channels or anything just the one chat, all to all)
 		# also i guess all the players data (usernames, maybe others) will need to be collected here from the server for the chat/scoreboard/whatever
@@ -89,32 +85,29 @@ class Pregame():
 				package=temp[i]
 				if len(package)==2:
 					print "Received: " + str(package)
+					if package[0]=='auth':
+						# if authenticated then receive all the spells and warlocks
+						print 'Authenticated YEAH!!!'
 					# if username is sent, assign to client
-					if package[0]=='chat':
-						print "Chat: "+self.clients[package[1][0]]+' said: '+package[1][1]
-						valid_packet=True
-					# updates warlocks in game
-					elif package[0]=='warlocks':
-						print "warlocks: "+str(package[1])
-						self.showbase.num_warlocks=package[1]
-						valid_packet=True
+					elif package[0]=='chat':
+						print "Chat: "+self.showbase.clients[package[1][0]]+' said: '+package[1][1]
+					elif package[0]=='spell':
+						spell=Spell()
+						spell.receive(package[1])
+						self.showbase.spells.append(spell)
+					elif package[0]=='client':
+						self.showbase.clients[package[1][0]]=package[1][1]
+						self.showbase.num_warlocks+=1
+						print 'client '+str(package[1][0])+' '+str(package[1][1])
 					elif package[0]=='which':
-						print "i am warlock: "+str(package[1])
 						self.showbase.which=package[1]
-						valid_packet=True
+						print "i am warlock: "+str(package[1])
 					# changes to game state (i guess this could be done the same as the gamestate ones, all but this change state packet, which will be same
 					elif package[0]=='state':
 						print "state: "+package[1]
 						if package[1]=='preround':
-							self.showbase.begin_preround()
+							self.showbase.start_preround()
 							return task.done
-						valid_packet=True
-					if not valid_packet:
-						data = {}
-						data[0] = "error"
-						data[1] = "Fail Server"
-						self.showbase.client.sendData(data)
-						print "Bad packet from server"
 				else:
 					print "Packet wrong size"
 			

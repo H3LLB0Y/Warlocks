@@ -1,7 +1,56 @@
 Changelog for WARLOCK [ARENA]
 
-# I guess newer versions will be added on top so no scrolling to see recent stuff
+//------------------------------------------------------------//
+Version:	0.0.1
+Author:	H3LLB0Y
+Date:		15/02/2012
 
+login.py
+-	Added imports for ConfigParser and os for configuration file reading
+-	Added client import for creation of client to auth server
+-	Changed 'game' to 'showbase' and updated all references
+-	Moved Client initialisation code and connection to authentication server to here from main.py
+-	attempt_login() and login_packetReader() are now in here instead of main.py
+
+login_server_inst.py
+-	removed 'game_tick' variable
+
+main.py
+-	Major cleanup of this file, now only shows basic flow code, everything is moved into respective files as it should be
+-	Client initialisation, connection to login server and login code is now in login.py
+-	join_server() for connecting to game server is now in mainmenu.py
+-	pregame_packetReader() is now removed and parts still required implemented in pregame main task
+
+mainmenu.py
+-	Added client import for connection to game server, and data setup code for before pregame
+
+pregame.py
+-	Added spell import back in for spell initialisation on receiving from game server
+-	Implemented required parts from pregame_packetReader() here in pregame packet listener task
+-	Receives new clients,spells,chat,which here now
+
+preround.py
+-	Reduced wait time on unfinished preround :P
+
+server.py
+-	Removed problem causing and wrong! setNoDelay(true) on TCP rendezvous connection (my bad :D)
+
+server_inst.py
+-	Set testing users to 0 (was ruining pregame, causing a crash because of not being an actual connection)
+-	Changed camera to be a bit higher and at least 90 units
+-	Setup packets for letting clients know of new users on authentication
+-	Removed commented out code (it was in the wrong place anyway)
+-	Reduced wait time for moving to round_ready_loop()
+
+warlock.py
+-	Increased minimum magnitude for warlock rotation (was causing overcorrection, and then back overcorrection)
+-	Changed implementation for destination and spell vector reduction (now is a constant reduction rather than multiplication by a float)
+-	Sets to 0 if length is less than 1 otherwise brings the vector down at a speed of 1 (length of vector)
+
+//------------------------------------------------------------//
+
+
+//------------------------------------------------------------//
 Version:	0.0.0
 Author:	H3LLB0Y
 Date:		13/02/2012
@@ -64,22 +113,4 @@ spell.py
 
 spellinst.py
 -	adapted for spell.model variable lookup in dictionary for location
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//------------------------------------------------------------//
