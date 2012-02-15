@@ -31,7 +31,19 @@ class DataBase:
 
 		# Check if it was valid.
 		self.login_valid = False
+	
+	def Db_test(self):
 		
+		try:
+			db_test = self.con = sqlite.connect(SERVER_DB)
+			if db_test:
+				print "DB-TEST: SERVER_DB "+"="+"OK"
+				self.con.close()
+			# Will add others here later.
+		except:
+			print "DB-TEST: SERVER_DB "+"="+"FAIL"
+		
+				
 	# Use the Clients_db function to save and load client account details.
 	def Client_acc_add(self, new_user, new_pass):
 		# Set the connection to the db.
