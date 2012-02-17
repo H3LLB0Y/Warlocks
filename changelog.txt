@@ -1,6 +1,17 @@
 Changelog for WARLOCK [ARENA]
 
 //------------------------------------------------------------//
+Version:        0.0.5
+Author: MJ-meo-dmt
+Date:		17/02/2012
+
+REMOVED
+- 	client_config.py
+- 	No longer need this since 0.0.0 :)
+
+//------------------------------------------------------------//
+
+//------------------------------------------------------------//
 Version:        0.0.4
 Author: MJ-meo-dmt
 Date:		17/02/2012
