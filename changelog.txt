@@ -1,6 +1,27 @@
 Changelog for WARLOCK [ARENA]
 
 //------------------------------------------------------------//
+Version:        0.0.4
+Author: MJ-meo-dmt
+Date:		17/02/2012
+
+login.py
+- 	Replaced the 'Global vars', by making them self.LOGIN_IP and self.LOGIN_PORT, renamed all.
+
+db.py
+- 	Added the ConfigParser Reader to read from databse.cfg
+- 	Added the required Vars for each DB (server,spell,item)
+
+database.cfg
+- 	Added the Database config file
+
+REMOVED
+- 	server_config.py
+
+//------------------------------------------------------------//
+
+
+//------------------------------------------------------------//
 Version:	0.0.3
 Author:	H3LLB0Y
 Date:		17/02/2012
