@@ -37,15 +37,13 @@ class Login():
 		self.login_attempt=False
 		
 		### CONFIG LOADER ###
-		global LOGIN_IP
-		global LOGIN_PORT
 		config = ConfigParser.RawConfigParser()
 		config.read('client.cfg')
-		LOGIN_IP = config.get('SERVER CONNECTION', 'host_ip')
-		LOGIN_PORT = config.getint('SERVER CONNECTION', 'host_port')
+		self.LOGIN_IP = config.get('SERVER CONNECTION', 'host_ip')
+		self.LOGIN_PORT = config.getint('SERVER CONNECTION', 'host_port')
 		### CONFIG END ###
 		
-		self.showbase.client = Client(LOGIN_IP, LOGIN_PORT, compress=True)
+		self.showbase.client = Client(self.LOGIN_IP, self.LOGIN_PORT, compress=True)
 		if not self.showbase.client.getConnected():
 			self.updateStatus("Could not connect to the Login server")
 			self.showbase.client=False
@@ -172,7 +170,7 @@ class Login():
 		if not self.login_attempt:
 			# attempt to connect again if it failed on startup
 			if not self.showbase.client:
-				self.showbase.client = Client(LOGIN_IP, LOGIN_PORT, compress=True)
+				self.showbase.client = Client(self.LOGIN_IP, self.LOGIN_PORT, compress=True)
 			if self.showbase.client.getConnected():
 				self.login_attempt=True
 				self.loginButton["state"]=DGG.DISABLED
