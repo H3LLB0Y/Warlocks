@@ -7,8 +7,7 @@ import sys, os
 from sqlite3 import dbapi2 as sqlite
 
 # Config (game)
-from server_config import *
-
+import ConfigParser, os
 
 
 ####>  CODE   <####
@@ -31,11 +30,19 @@ class DataBase:
 
 		# Check if it was valid.
 		self.login_valid = False
+		
+		### CONFIG LOADER ###
+		config = ConfigParser.RawConfigParser()
+		config.read('database.cfg')
+		self.SERVER_DB = config.get('Database', 'server_db')
+		self.SPELL_DB = config.get('Database', 'spell_db')
+		self.ITEM_DB = config.get('Database','item_db')
+		### CONFIG END ###
 	
 	def Db_test(self):
 		
 		try:
-			db_test = self.con = sqlite.connect(SERVER_DB)
+			db_test = self.con = sqlite.connect(self.SERVER_DB)
 			if db_test:
 				print "DB-TEST: SERVER_DB "+"="+"OK"
 				self.con.close()
@@ -47,7 +54,7 @@ class DataBase:
 	# Use the Clients_db function to save and load client account details.
 	def Client_acc_add(self, new_user, new_pass):
 		# Set the connection to the db.
-		self.con = sqlite.connect(SERVER_DB)
+		self.con = sqlite.connect(self.SERVER_DB)
 
 		# Set the Cursor for This connection.
 		self.cur = self.con.cursor()
@@ -84,7 +91,7 @@ class DataBase:
 	def Client_getLogin(self, user, passw):
 
 		# Get connection.
-		self.con = sqlite.connect(SERVER_DB)
+		self.con = sqlite.connect(self.SERVER_DB)
 
 		# Cursor setup.
 		self.cur = self.con.cursor()
