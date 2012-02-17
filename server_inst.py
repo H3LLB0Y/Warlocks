@@ -228,12 +228,9 @@ class ServerInst():
 						for u in range(len(self.users)):
 							if self.users[u]['connection']==package[1]:
 								print "Packet from "+self.users[u]['name']
-								# process packet
-								update_warlocks=False
 								# if chat packet
 								if package[0][0]=='chat':
 									print "Chat: "+package[0][1]
-									valid_packet=True
 									# Broadcast data to all clients ("username: message")
 									data = {}
 									data[0]='chat'
@@ -245,29 +242,20 @@ class ServerInst():
 								elif package[0][0]=='ready':
 									print self.users[u]['name']+" is ready!"
 									self.users[u]['ready']=True
-									valid_packet=True
-									update_warlocks=True
 								# else if unready packet
 								elif package[0][0]=='unready':
 									print self.users[u]['name']+" is not ready!"
 									self.users[u]['ready']=False
-									valid_packet=True
-									update_warlocks=True
-								if update_warlocks:
-									data = {}
-									data[0]='warlocks'
-									data[1]=len(self.users)
-									self.server.broadcastData(data)
+								# else if disconnect packet
+								elif package[0][0]=='disconnect':
+									print self.users[u]['name']+" is disconnecting!"
+									del self.users[u]
+									"""data = {}
+									data[0] = "disconnect"
+									data[1] = u
+									self.server.broadcastData(data)"""
 								# break out of for loop
 								break
-							#else:
-							#	print str(self.users[u]['connection'])+" "+str(package[1])
-						if not valid_packet:
-							data = {}
-							data[0] = "error"
-							data[1] = "Please Login"
-							self.server.sendData(data,package[1])
-							print "User not logged in"
 					else:
 						print "Data in packet wrong size"
 				else:

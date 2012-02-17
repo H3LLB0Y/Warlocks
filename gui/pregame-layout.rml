@@ -1,0 +1,154 @@
+<rml>
+	<head>
+		<title>Pregame</title>
+		<link type="text/template" href="window.rml" />
+		<style>
+			#spell_area {
+				background-color: #0000FF;
+				border-width: 0.25%;
+				border-top-color: #FFFFFF;
+				border-right-color: #FFFFFF;
+				border-bottom-color: #FFFFFF;
+				border-left-color: #FFFFFF;
+				width: 64.5%;
+				height: 49.5%;
+				float: left;
+			}
+			#spell_select_area {
+				background-color: #FFFF00;
+				width: 25%;
+				height: 100%;
+				overflow-y: scroll;
+				float: left;
+			}
+			#spell_select {
+				background-color: #FF00FF;
+				height: 18%;
+				width: 95%;
+				margin: 1%;
+			}
+			button#spell_select {
+				height: 55%;
+				margin: auto;
+			}
+			#spell_details {
+				background-color: #00FFFF;
+				width: 73%;
+				height: 100%;
+				float: right;
+			}
+			#player_sidebar {
+				background-color: #FF0000;
+				border-width: 0.25%;
+				border-top-color: #FFFFFF;
+				border-right-color: #FFFFFF;
+				border-bottom-color: #FFFFFF;
+				border-left-color: #FFFFFF;
+				width: 34.5%;
+				height: 99.5%;
+				float: right;
+				text-align: center;
+				font-size: 25px;
+			}
+			#chat_area {
+				background-color: #00FF00;
+				border-width: 0.25%;
+				border-top-color: #FFFFFF;
+				border-right-color: #FFFFFF;
+				border-bottom-color: #FFFFFF;
+				border-left-color: #FFFFFF;
+				width: 64.5%;
+				height: 49.5%;
+				float: left;
+			}
+			#textbox {
+				background-color: #FF0000;
+				width: 100%;
+				height: 90%;
+				overflow-y: scroll;
+			}
+			#chatbox {
+				vertical-align: bottom;
+			}
+		</style>
+		<script>
+def CloseLogo():
+	if document.context:
+		document.context.documents['logo'].Close()
+
+def OnLoad(window):
+	datagrid = window.GetElementById('datagrid')
+	datagrid.AddEventListener('rowupdate', OnRowAdd, False)
+
+def OnRowAdd():
+	input = document.GetElementById('player_input')
+	if input:
+		input.Focus()
+		</script>
+	</head>
+	<body onload="OnLoad(self)">
+		<div id="spell_area">
+			<div id="spell_select_area">
+				<div id="spell_select">
+					<button id="spell_select">Spell</button>
+				</div>
+				<div id="spell_select">
+					<button id="spell_select">Spell</button>
+				</div>
+				<div id="spell_select">
+					<button id="spell_select">Spell</button>
+				</div>
+				<div id="spell_select">
+					<button id="spell_select">Spell</button>
+				</div>
+				<div id="spell_select">
+					<button id="spell_select">Spell</button>
+				</div>
+				<div id="spell_select">
+					<button id="spell_select">Spell</button>
+				</div>
+				<div id="spell_select">
+					<button id="spell_select">Spell</button>
+				</div>
+				<div id="spell_select">
+					<button id="spell_select">Spell</button>
+				</div>
+			</div>
+			<div id="spell_details">
+				<button id="cake" onclick="Test()" />
+			</div>
+		</div>
+		<div id="player_sidebar">
+			1<br />
+			2<br />
+			3<br />
+			4<br />
+			5<br />
+			6<br />
+			7<br />
+			8<br />
+			1<br />
+			2<br />
+			3<br />
+			4<br />
+			5<br />
+			6<br />
+			7<br />
+			8<br />
+			<div>
+				<button id="ready_button">Ready?</button>
+				<button id="disconnect_button">Disconnect</button>
+			</div>
+		</div>
+		<div id="chat_area">
+			<div id="textbox">
+				<datagrid id="messages" source="messages.messages">
+					<col fields="name" width="10%">Name:</col>
+					<col fields="message" width="90%">Message:</col>
+				</datagrid>
+			</div>
+			<input id="message_box" type="text" />
+			<button id="send_button">Send</button>
+		</div>
+	</body>
+</rml>

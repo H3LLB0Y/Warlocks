@@ -1,12 +1,44 @@
 Changelog for WARLOCK [ARENA]
 
 //------------------------------------------------------------//
+Version:	0.0.3
+Author:	H3LLB0Y
+Date:		17/02/2012
+
+client.cfg
+-	Changed 'host_ip' to actual ip-address instead of '127.0.0.1'
+
+login_server_core.py
+-	Added fix for getting current server list
+-	Added print of active servers when a client joins to compare with what they receive
+
+pregame.py
+-	Added rocket import for GUI
+-	Started implementing GUI and dynamic chat so it updates in the gui (not quite there :P)
+-	Removed old gui implementation (new one has more functionality, nothing less)
+
+server_inst.py
+-	Cleaned up a bit of the rubbish code that does nothing
+-	Added a receiver for disconnecting clients (a new button in pregame GUI)
+//------------------------------------------------------------//
+
+//------------------------------------------------------------//
+Version:	0.0.2
+Author:	MJ-meo-dmt
+Date:		16/02/2012
+
+db.py
+-	Added a basic DB tester function, just to see if its available.
+
+login_server_inst.py
+-	Added a db tester to the db file.  To check if its available
+-	Removed some unwanted useless 'prints'.
+//------------------------------------------------------------//
+
+//------------------------------------------------------------//
 Version:	0.0.1
 Author:	H3LLB0Y
 Date:		15/02/2012
-
-db.py
-- 	Added a basic DB tester function, just to see if its available.
 
 login.py
 -	Added imports for ConfigParser and os for configuration file reading
@@ -17,8 +49,6 @@ login.py
 
 login_server_inst.py
 -	removed 'game_tick' variable
--       Added a db tester to the db file.  To check if its available
-- 	Removed some unwanted useless 'prints'.
 
 main.py
 -	Major cleanup of this file, now only shows basic flow code, everything is moved into respective files as it should be

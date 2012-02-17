@@ -158,7 +158,7 @@ class LoginServer:
 						new_user['new_dest']=False
 						new_user['new_spell']=False
 						self.clients[len(self.clients)]=new_user
-							# Send back the valid check.
+						# Send back the valid check.
 						data={}
 						data[0]='login_valid' # If client gets this the client should switch to main_menu.
 						data[1]={}
@@ -179,7 +179,7 @@ class LoginServer:
 				print 'From: '+str(datagram.getAddress())
 				server={}
 				server[0]=package[1]
-				server[1]=datagram.getAddress()
+				server[1]=str(datagram.getAddress())
 				self.active_servers.append(server)
 			# if authentication from server reply with auth/not auth of username
 			if package[0]=='auth':
@@ -222,6 +222,7 @@ class LoginServer:
 						print "HERE IS ACTIVE: ", self.activeConnections
 						self.tempConnections.remove(datagram.getConnection())
 						print "HERE IS TEMP", self.tempConnections
+						print self.active_servers
 					print "Auth Done!"
 					# in auth def or after the connection will be moved to self.activeConnections
 					# and then removed from the temp list

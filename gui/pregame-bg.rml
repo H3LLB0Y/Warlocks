@@ -1,0 +1,21 @@
+<rml>
+	<head>
+		<style>
+			body {
+				width: 100%;
+				height: 100%;
+				z-index: bottom;
+				z-index: -1;
+			}
+			img {
+				width: 800px;
+				height: 600px;
+				margin: auto;
+				padding-left: 0px;
+			}
+		</style>
+	</head>
+	<body>
+		<img src="warlock.jpg" />
+	</body>
+</rml>
