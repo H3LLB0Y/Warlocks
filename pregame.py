@@ -9,16 +9,11 @@ from spellmanager					import SpellManager
 
 class MessageDataSource(DataSource):
 	def __init__(self,name):
-		self.messages = [] # could be any name
-		self.messages.append({'name': 'Nordom', 'message': 'Man, i am so noob at this game'}) 
-		self.messages.append({'name': 'H3LLB0Y', 'message': 'yea i know :D im gna pwn you noob! :P'}) 
+		self.messages = []
 		DataSource.__init__(self,name)
 		
 	def add_new_message(self,name,message):
-		row=self.GetNumRows('messages')
 		self.messages.append({'name':name,'message':message})
-		print "messages"
-		print self.messages
 	
 	def GetRow(self, table_name, index, columns):
 		row = list()
@@ -41,6 +36,73 @@ class MessageDataSource(DataSource):
 		if table_name=='messages':
 			return len(self.messages)
 		return 0
+		
+class PlayersDataSource(DataSource):
+	def __init__(self,name):
+		self.players = []
+		DataSource.__init__(self,name)
+		
+	def update_players(self,name,ready):
+		player_found=False
+		for p in self.players:
+			if p['name']==name:
+				p['ready']=ready
+				player_found=True
+				break
+		if not player_found:
+			self.players.append({'name':name,'ready':ready})
+	
+	def GetRow(self, table_name, index, columns):
+		row = list()
+		try:
+			if index > len(self.players)-1:
+				return row
+			if table_name == 'players':
+				for col in columns:
+					if col not in self.players[index]:
+						continue
+					if col == 'name':
+						row.append(self.players[index][col])
+					elif col == 'ready':
+						row.append(self.players[index][col])
+		except:
+			traceback.print_exc()
+		return row 
+
+	def GetNumRows(self, table_name):
+		if table_name=='players':
+			return len(self.players)
+		return 0
+		
+class SpellsDataSource(DataSource):
+	def __init__(self,name):
+		self.spells = []
+		DataSource.__init__(self,name)
+		
+	def add_spell(self,spell):
+		pass
+	
+	def GetRow(self, table_name, index, columns):
+		row = list()
+		try:
+			if table_name == 'spells':
+				if index > len(self.spells)-1:
+					return row 
+				for col in columns:
+					if col not in self.spells[index]:
+						continue
+					if col == 'name':
+						row.append(self.spells[index][col])
+					elif col == 'ready':
+						row.append(self.spells[index][col])
+		except:
+			traceback.print_exc()
+		return row 
+
+	def GetNumRows(self, table_name):
+		if table_name=='spells':
+			return len(self.spells)
+		return 0
 
 class Pregame():
 	def __init__(self, showbase):
@@ -50,7 +112,8 @@ class Pregame():
 		
 		LoadFontFace("gui/Delicious-Bold.otf")
 
-		self.datasource = MessageDataSource('messages')
+		self.messagesdatasource = MessageDataSource('messages')
+		self.playersdatasource = PlayersDataSource('players')
 		
 		self.rocket=RocketRegion.make('warlocksRocket',base.win)
 		self.rocket.setActive(1)
@@ -70,8 +133,10 @@ class Pregame():
 		self.send_button.AddEventListener('click',self.send_message,True)
 		
 		self.message = self.doc.GetElementById('message_box')
-		
 		self.showbase.accept("enter",self.send_message)
+		self.messages=self.doc.GetElementById('messages')
+		
+		self.players=self.doc.GetElementById('players')
 		
 		self.ready_button = self.doc.GetElementById('ready_button')
 		self.ready_button.AddEventListener('click',self.toggle_ready,True)
@@ -97,7 +162,8 @@ class Pregame():
 					# if username is sent, assign to client
 					elif package[0]=='chat':
 						print "Chat: "+self.showbase.clients[package[1][0]]+' said: '+package[1][1]
-						self.datasource.add_new_message(self.showbase.clients[package[1][0]],package[1][1])
+						self.messagesdatasource.add_new_message(self.showbase.clients[package[1][0]],package[1][1])
+						self.messages.SetDataSource('messages.messages')
 					elif package[0]=='spell':
 						spell=Spell()
 						spell.receive(package[1])
@@ -105,7 +171,13 @@ class Pregame():
 					elif package[0]=='client':
 						self.showbase.clients[package[1][0]]=package[1][1]
 						self.showbase.num_warlocks+=1
+						self.playersdatasource.update_players(package[1][1],'Unready')
+						self.players.SetDataSource('players.players')
 						print 'client '+str(package[1][0])+' '+str(package[1][1])
+					elif package[0]=='ready':
+						self.playersdatasource.update_players(package[1][0],package[1][1])
+						self.players.SetDataSource('players.players')
+						print 'ready '+str(package[1][0])+' '+str(package[1][1])
 					elif package[0]=='which':
 						self.showbase.which=package[1]
 						print "i am warlock: "+str(package[1])
@@ -121,18 +193,18 @@ class Pregame():
 		return task.again
 	
 	def toggle_ready(self):
-		"""if self.ready:
+		if self.ready:
 			self.ready=False
 			data = {}
 			data[0] = "unready"
 			data[1] = "unready"
 			self.showbase.client.sendData(data)
-		else:"""
-		self.ready=True
-		data = {}
-		data[0] = "ready"
-		data[1] = "ready"
-		self.showbase.client.sendData(data)
+		else:
+			self.ready=True
+			data = {}
+			data[0] = "ready"
+			data[1] = "ready"
+			self.showbase.client.sendData(data)
 		
 	def disconnect(self):
 		data = {}

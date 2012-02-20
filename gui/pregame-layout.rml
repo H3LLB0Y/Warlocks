@@ -67,26 +67,17 @@
 				height: 90%;
 				overflow-y: scroll;
 			}
-			#chatbox {
-				vertical-align: bottom;
+			#message_box {
+				width: 75%;
+				height: 10%;
+			}
+			#send_button {
+				width: 15%;
+				height: 10%;
 			}
 		</style>
-		<script>
-def CloseLogo():
-	if document.context:
-		document.context.documents['logo'].Close()
-
-def OnLoad(window):
-	datagrid = window.GetElementById('datagrid')
-	datagrid.AddEventListener('rowupdate', OnRowAdd, False)
-
-def OnRowAdd():
-	input = document.GetElementById('player_input')
-	if input:
-		input.Focus()
-		</script>
 	</head>
-	<body onload="OnLoad(self)">
+	<body>
 		<div id="spell_area">
 			<div id="spell_select_area">
 				<div id="spell_select">
@@ -119,24 +110,12 @@ def OnRowAdd():
 			</div>
 		</div>
 		<div id="player_sidebar">
-			1<br />
-			2<br />
-			3<br />
-			4<br />
-			5<br />
-			6<br />
-			7<br />
-			8<br />
-			1<br />
-			2<br />
-			3<br />
-			4<br />
-			5<br />
-			6<br />
-			7<br />
-			8<br />
+			<datagrid id="players" source="players.players">
+				<col fields="name" width="50%">Name:</col>
+				<col fields="ready" width="50%">Ready?</col>
+			</datagrid>
 			<div>
-				<button id="ready_button">Ready?</button>
+				<button id="ready_button">Ready/Unready</button>
 				<button id="disconnect_button">Disconnect</button>
 			</div>
 		</div>

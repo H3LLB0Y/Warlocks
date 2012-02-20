@@ -55,7 +55,7 @@ class Warlock():
 		self.dest_vel=Vec3(0,0,0)
 		self.spell_vel=Vec3(0,0,0)
 		# damage taken by warlock affects the friction applied to them, more damage == more slidey
-		self.damage=1
+		self.friction=1.0
 		
 		# variable to track if warlock is on lava or still on arena
 		self.on_lava=False
@@ -91,9 +91,6 @@ class Warlock():
 		self.dest_node.setZ(-10)
 		self.new_destination=False
 		self.casting=True
-		
-	def is_on_lava(self,is_on):
-		self.on_lava=is_on
 	
 	# turn warlock to face destination/target
 	def adjust_angle(self,angle,dt):
@@ -127,15 +124,24 @@ class Warlock():
 	
 	def get_vel_mag(self):
 		return self.spell_vel.length()+self.dest_vel.length()
+		
+	# will be for hp caused by spells
+	def remove_hp(self,hp):
+		self.hp-=hp
 	
-	# will be for damage caused by spells
-	def add_damage(self,damage):
-		self.damage+=damage
+	# will be for friction caused by spells
+	def add_friction(self,friction):
+		self.friction+=friction
+		
+	def get_friction(self):
+		return self.friction
 	
 	# update function for warlock, processes physics and movement/turning of warlock
 	def update(self,dt,bulletworld,spell_man,worldNP,warlocks):
-		if self.damage<1:
-			self.damage=1
+		if self.friction<1.0:
+			self.friction=1.0
+		if self.friction>1000.0:
+			self.friction=1000.0
 		
 		# develocitize the destination velocity (slow it down, will get reset if it is still going to destination
 		if self.dest_vel.length()<1.0:
@@ -201,25 +207,26 @@ class Warlock():
 						hit_warlock=True
 						print 'hit warlock '+warlocks[i][0]
 		
-		if not hit_warlock:
-			# process velocitys from both destination
-			self.collNP.setX(self.collNP.getX()+self.dest_vel.getX()*dt)
-			self.collNP.setY(self.collNP.getY()+self.dest_vel.getY()*dt)
-			# and spells
-			self.collNP.setX(self.collNP.getX()+self.spell_vel.getX()*dt)
-			self.collNP.setY(self.collNP.getY()+self.spell_vel.getY()*dt)
+		#if not hit_warlock:
+		# process velocitys from both destination
+		self.collNP.setX(self.collNP.getX()+self.dest_vel.getX()*dt)
+		self.collNP.setY(self.collNP.getY()+self.dest_vel.getY()*dt)
+		# and spells
+		self.collNP.setX(self.collNP.getX()+self.spell_vel.getX()*dt)
+		self.collNP.setY(self.collNP.getY()+self.spell_vel.getY()*dt)
 		
 		pFrom=self.collNP.getPos()
 		pTo=Point3(pFrom+Point3(0.0,0.0,-10.0))
 		result = bulletworld.rayTestClosest(pFrom, pTo)
 		# if it does not hit arena then it must be on lava
 		if result.hasHit():
-			self.is_on_lava(False)
+			self.on_lava=False
 		else:
-			self.is_on_lava(True)
+			self.on_lava=True
 		
 		if self.on_lava:
 			self.hp-=0.5
+			self.friction+=5
 		
 		if self.hp<=0:
 			self.dead=True

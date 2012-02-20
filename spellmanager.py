@@ -27,8 +27,9 @@ class SpellManager:
 			else:
 				for i in range(self.num_warlocks):
 					if result==warlocks[i][0]:
-						warlocks[i][1].add_spell_vel(move_forwards(x.collNP.getH(),x.spell.target_knockback))
-						warlocks[i][1].add_damage(x.spell.damage)
+						warlocks[i][1].add_spell_vel(move_forwards(x.collNP.getH(),x.spell.target_knockback)*(warlocks[i][1].get_friction()/1000.0))
+						warlocks[i][1].remove_hp(x.spell.hp)
+						warlocks[i][1].add_friction(x.spell.friction)
 						print 'hit warlock '+warlocks[i][0]
 				x.remove_me=True
 		for x in self.active_spells:

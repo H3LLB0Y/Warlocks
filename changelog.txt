@@ -1,9 +1,52 @@
 Changelog for WARLOCK [ARENA]
 
 //------------------------------------------------------------//
-Version:        0.0.5
-Author: MJ-meo-dmt
-Date:		17/02/2012
+Version:	0.0.6
+Author:	H3LLB0Y
+Date:		21/02/2012
+
+server_db
+-	Added user H3LLB0Y
+
+pregame-layout.rml
+-	Fixed up the design a bit
+
+login_server_core.py
+-	Added check for if client exists before checking connection is the same as leaving client
+
+pregame.py
+-	Fixed MessageDataSource class so works well with pregame chat
+-	Added PlayersDataSource class for joining clients and their ready status
+-	Added start of SpellsDataSource class for spells and their details
+-	Added functionality for 'messages' and 'players' data sources for the GUI
+-	Added updating code for the GUI when clients join/chat comes in
+-	Added functionality for ready/unready button
+
+server_inst.py
+-	Added readyness packet to server-to-client packets (well, changed implementation for 'ready' packet)
+-	And also ready/unready packets from clients already connected, broadcasts to all connected
+
+spell.py
+-	Removed 'damage' variable, and replaced with hp and friction (friction decides the slideyness/increased velocities on spells)
+-	Fixed the send and receive for the spells to incorporate changes
+
+spellmanager.py
+-	Adjusted for change to spell implementation
+
+warlock.py
+-	Changed 'damage' variable for 'friction'
+-	Removed useless is_on_lava() function, and replaced calls with setting variable self.on_lava (all the function did anyway...)
+-	Added hp adjustment function
+-	Updated friction functions
+-	Set limits for friction
+-	Removed the 'stuck' for warlock-warlock collisions
+
+//------------------------------------------------------------//
+
+//------------------------------------------------------------//
+Version:	0.0.5
+Author:	MJ-meo-dmt
+Date:	17/02/2012
 
 REMOVED
 - 	client_config.py
@@ -12,9 +55,9 @@ REMOVED
 //------------------------------------------------------------//
 
 //------------------------------------------------------------//
-Version:        0.0.4
-Author: MJ-meo-dmt
-Date:		17/02/2012
+Version:	0.0.4
+Author:	MJ-meo-dmt
+Date:	17/02/2012
 
 login.py
 - 	Replaced the 'Global vars', by making them self.LOGIN_IP and self.LOGIN_PORT, renamed all.

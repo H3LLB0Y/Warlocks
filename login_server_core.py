@@ -80,9 +80,11 @@ class LoginServer:
 			# Remove the connection we just found to be "reset" or "disconnected"
 			self.cReader.removeConnection(connection)
 			for u in range(len(self.clients)):
-				if self.clients[u]['connection']==connection:
-					del self.clients[u]
-					break
+				if self.clients[u]:
+					if self.clients[u]['connection']==connection:
+						del self.clients[u]
+						self.clients[u]=False
+						break
 			
 			# Loop through the activeConnections till we find the connection we just deleted
 			# and remove it from our activeConnections list

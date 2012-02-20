@@ -161,13 +161,18 @@ class ServerInst():
 									data[1][0]=c
 									data[1][1]=self.users[c]['name']
 									self.server.sendData(data,self.users[u]['connection'])
+									data = {}
+									data[0] = 'ready'
+									data[1] = {}
+									data[1][0]=self.users[c]['name']
+									if self.users[c]['ready']:
+										data[1][1]='Ready'
+									else:
+										data[1][1]='Unready'
+									self.server.sendData(data,self.users[u]['connection'])
 								data = {}
 								data[0] = 'which'
 								data[1] = self.users[u]['which']
-								self.server.sendData(data,self.users[u]['connection'])
-								data = {}
-								data[0] = 'ready'
-								data[1] = self.users[u]['name']
 								self.server.sendData(data,self.users[u]['connection'])
 						for u in range(len(self.users)):
 							if not self.users[u]['name']==package[1]:
@@ -242,10 +247,22 @@ class ServerInst():
 								elif package[0][0]=='ready':
 									print self.users[u]['name']+" is ready!"
 									self.users[u]['ready']=True
+									data = {}
+									data[0] = 'ready'
+									data[1] = {}
+									data[1][0]=self.users[u]['name']
+									data[1][1]='Ready'
+									self.server.broadcastData(data)
 								# else if unready packet
 								elif package[0][0]=='unready':
 									print self.users[u]['name']+" is not ready!"
 									self.users[u]['ready']=False
+									data = {}
+									data[0] = 'ready'
+									data[1] = {}
+									data[1][0]=self.users[u]['name']
+									data[1][1]='Unready'
+									self.server.broadcastData(data)
 								# else if disconnect packet
 								elif package[0][0]=='disconnect':
 									print self.users[u]['name']+" is disconnecting!"

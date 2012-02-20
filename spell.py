@@ -1,7 +1,8 @@
 class Spell:
 	MODELS={0:'media/spells/blockyball',1:'media/spells/pointyball'}
 	def __init__(self):
-		self.damage=0
+		self.hp=0
+		self.friction=0
 		self.target_knockback=0
 		self.self_knockback=0
 		self.range=0
@@ -15,28 +16,30 @@ class Spell:
 	
 	def send(self):
 		array={}
-		array[0]=self.damage
-		array[1]=self.target_knockback
-		array[2]=self.self_knockback
-		array[3]=self.range
-		array[4]=self.speed
-		array[5]=self.aoe
-		array[6]=self.aoe_range
-		array[7]=self.targeting
-		array[8]=self.casting_time
-		array[9]=self.interruptable
-		array[10]=self.model
+		array[0]=self.hp
+		array[1]=self.friction
+		array[2]=self.target_knockback
+		array[3]=self.self_knockback
+		array[4]=self.range
+		array[5]=self.speed
+		array[6]=self.aoe
+		array[7]=self.aoe_range
+		array[8]=self.targeting
+		array[9]=self.casting_time
+		array[10]=self.interruptable
+		array[11]=self.model
 		return array
 	
 	def receive(self,array):
-		self.damage=array[0]
-		self.target_knockback=array[1]
-		self.self_knockback=array[2]
-		self.range=array[3]
-		self.speed=array[4]
-		self.aoe=array[5]
-		self.aoe_range=array[6]
-		self.targeting=array[7]
-		self.casting_time=array[8]
-		self.interruptable=array[9]
-		self.model=array[10]
+		self.hp=array[0]
+		self.friction=array[1]
+		self.target_knockback=array[2]
+		self.self_knockback=array[3]
+		self.range=array[4]
+		self.speed=array[5]
+		self.aoe=array[6]
+		self.aoe_range=array[7]
+		self.targeting=array[8]
+		self.casting_time=array[9]
+		self.interruptable=array[10]
+		self.model=array[11]
