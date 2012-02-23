@@ -79,8 +79,8 @@ class ServerInst():
 		# also it will need to be created in there from data passed from the server (where it will be procedurally generated)
 		# spell0
 		spell=Spell()
-		spell.damage=10
-		spell.target_knockback=20
+		spell.damage=15
+		spell.target_knockback=60
 		spell.self_knockback=0
 		spell.range=25
 		spell.speed=15
@@ -94,9 +94,9 @@ class ServerInst():
 		
 		# spell1
 		spell=Spell()
-		spell.damage=25
-		spell.target_knockback=10
-		spell.self_knockback=0
+		spell.damage=35
+		spell.target_knockback=30
+		spell.self_knockback=-10
 		spell.range=50
 		spell.speed=25
 		spell.aoe=False
@@ -113,7 +113,7 @@ class ServerInst():
 		spell.target_knockback=10
 		spell.self_knockback=30
 		spell.range=50
-		spell.speed=15
+		spell.speed=20
 		spell.aoe=False
 		spell.aoe_range=0
 		spell.targeting=False
