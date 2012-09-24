@@ -32,8 +32,8 @@ class World():
 		self.proj.setPos(0,0,1)
 		self.proj.lookAt(0,0,0)
 
-		self.tex = loader.loadTexture('media/world/textures/Mapzone Editz/fieldstone-c.jpg')
-		#self.norm = loader.loadTexture('media/world/textures/Mapzone Editz/fieldstone-n.jpg')
+		self.tex = loader.loadTexture('media/world/fieldstone-c.jpg')
+		#self.norm = loader.loadTexture('media/world/fieldstone-n.jpg')
 		self.ts = TextureStage('ts')
 		
 	def raise_lava(self):

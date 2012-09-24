@@ -33,25 +33,25 @@ import sys
 class Main(ShowBase):
 	def __init__(self):
 		ShowBase.__init__(self)
-		self.login=Login(self)
+		self.login = Login(self)
 	
-	def start_mainmenu(self):
-		self.login.destroy()
-		self.mainmenu=MainMenu(self)
+	def start_mainmenu(self, prev):
+		prev.hide()
+		self.mainmenu = MainMenu(self)
 	
 	def start_pregame(self):
 		self.mainmenu.hide()
-		self.pregame=Pregame(self)
+		self.pregame = Pregame(self)
 	
 	def start_preround(self):
 		self.pregame.hide()
-		self.preround=Preround(self)
+		self.preround = Preround(self)
 	
 	def start_round(self):
 		self.preround.hide()
-		self.round=Round(self)
+		self.round = Round(self)
 		
-	def host_game(self,params):
+	def host_game(self, params):
 		pid = Popen(["python", "server_inst.py", params]).pid
 	
 	def quit(self):

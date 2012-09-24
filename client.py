@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from pandac.PandaModules import QueuedConnectionManager, QueuedConnectionListener
 from pandac.PandaModules import QueuedConnectionReader, ConnectionWriter
 from direct.distributed.PyDatagram import PyDatagram
@@ -22,6 +20,8 @@ class Client:
 
 		# By default, we are not connected
 		self.connected = False
+
+		self.passedData = []
 
 		self.connect(self.host, self.port, self.timeout)
 		self.startPolling()
@@ -71,12 +71,16 @@ class Client:
 		myPyDatagram.addString(self.encode(data, self.compress))
 		self.cWriter.send(myPyDatagram, self.myConnection)
 
+	def passData(self, data):
+		self.passedData.append(data)
+
 	def getData(self):
 		data = []
+		for passed in self.passedData:
+			data.append(passed)
+			self.passedData.remove(passed)
 		while self.cReader.dataAvailable():
-			datagram = NetDatagram()  # catch the incoming data in this instance
-			# Check the return value; if we were threaded, someone else could have
-			# snagged this data before we did
+			datagram = NetDatagram()
 			if self.cReader.getData(datagram):
 				data.append(self.processData(datagram))
 		return data

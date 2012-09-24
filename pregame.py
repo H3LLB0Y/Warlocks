@@ -1,11 +1,11 @@
-from direct.gui.DirectGui     import *
-from direct.gui.OnscreenImage import OnscreenImage
-from direct.gui.OnscreenText  import OnscreenText
-from pandac.PandaModules      import *
+from direct.gui.DirectGui		import *
+from direct.gui.OnscreenImage	import OnscreenImage
+from direct.gui.OnscreenText	import OnscreenText
+from pandac.PandaModules		import *
 from panda3d.rocket				import *
 
-from spell							import Spell
-from spellmanager					import SpellManager
+from game						import Game
+from user 						import User
 
 class MessageDataSource(DataSource):
 	def __init__(self,name):
@@ -13,7 +13,7 @@ class MessageDataSource(DataSource):
 		DataSource.__init__(self,name)
 		
 	def add_new_message(self,name,message):
-		self.messages.append({'name':name,'message':message})
+		self.messages.append({'name': name, 'message' :message})
 	
 	def GetRow(self, table_name, index, columns):
 		row = list()
@@ -106,9 +106,9 @@ class SpellsDataSource(DataSource):
 
 class Pregame():
 	def __init__(self, showbase):
-		self.showbase=showbase
+		self.showbase = showbase
 		
-		self.ready=False
+		self.ready = False
 		
 		LoadFontFace("gui/Delicious-Bold.otf")
 
@@ -145,81 +145,60 @@ class Pregame():
 		self.disconnect_button = self.doc.GetElementById('disconnect_button')
 		self.disconnect_button.AddEventListener('click',self.disconnect,True)
 
+		self.showbase.game = Game()
+
+		self.showbase.users = []
+
 		# Add the game loop procedure to the task manager.
 		taskMgr.doMethodLater(1.0, self.update_lobby, 'Update Lobby')
 	
 	def update_lobby(self, task):
-		temp=self.showbase.client.getData()
-		if temp!=[]:
-			for i in range(len(temp)):
-				valid_packet=False
-				package=temp[i]
-				if len(package)==2:
-					print "Received: " + str(package)
-					if package[0]=='auth':
-						# if authenticated then receive all the spells and warlocks
-						print 'Authenticated YEAH!!!'
-					# if username is sent, assign to client
-					elif package[0]=='chat':
-						print "Chat: "+self.showbase.clients[package[1][0]]+' said: '+package[1][1]
-						self.messagesdatasource.add_new_message(self.showbase.clients[package[1][0]],package[1][1])
-						self.messages.SetDataSource('messages.messages')
-					elif package[0]=='spell':
-						spell=Spell()
-						spell.receive(package[1])
-						self.showbase.spells.append(spell)
-					elif package[0]=='client':
-						self.showbase.clients[package[1][0]]=package[1][1]
-						self.showbase.num_warlocks+=1
-						self.playersdatasource.update_players(package[1][1],'Unready')
+		temp = self.showbase.client.getData()
+		if temp != []:
+			for package in temp:
+				if len(package) == 2:
+					print "Received: ", str(package)
+					if package[0] == 'chat':
+						if len(package[1]) == 2:
+							print 'Chat: ', package[1][0], ' said: ', package[1][1]
+							self.messagesdatasource.add_new_message(package[1][0], package[1][1])
+							self.messages.SetDataSource('messages.messages')
+					elif package[0] == 'game':
+						self.showbase.game.unpackageData(package[1])
+					elif package[0] == 'client':
+						self.showbase.users.append(User(package[1]))
+						self.playersdatasource.update_players(package[1],'Unready')
 						self.players.SetDataSource('players.players')
-						print 'client '+str(package[1][0])+' '+str(package[1][1])
-					elif package[0]=='ready':
-						self.playersdatasource.update_players(package[1][0],package[1][1])
+						print 'client ', package[1]
+					elif package[0] == 'ready':
+						if package[1][1] == True:
+							self.playersdatasource.update_players(package[1][0], 'Ready')
+						else:
+							self.playersdatasource.update_players(package[1][0], 'Not Ready')
 						self.players.SetDataSource('players.players')
-						print 'ready '+str(package[1][0])+' '+str(package[1][1])
-					elif package[0]=='which':
-						self.showbase.which=package[1]
-						print "i am warlock: "+str(package[1])
+						print 'ready ', str(package[1][0]), ' ', str(package[1][1])
 					# changes to game state (i guess this could be done the same as the gamestate ones, all but this change state packet, which will be same
 					elif package[0]=='state':
 						print "state: "+package[1]
 						if package[1]=='preround':
 							self.showbase.start_preround()
 							return task.done
-				else:
-					print "Packet wrong size"
 			
 		return task.again
 	
 	def toggle_ready(self):
-		if self.ready:
-			self.ready=False
-			data = {}
-			data[0] = "unready"
-			data[1] = "unready"
-			self.showbase.client.sendData(data)
-		else:
-			self.ready=True
-			data = {}
-			data[0] = "ready"
-			data[1] = "ready"
-			self.showbase.client.sendData(data)
+		self.ready = not self.ready
+		self.showbase.client.sendData(('ready', self.ready))
 		
 	def disconnect(self):
-		data = {}
-		data[0] = "disconnect"
-		data[1] = "disconnect"
-		self.showbase.client.sendData(data)
-		self.showbase.quit()
+		self.showbase.client.sendData(("disconnect", "disconnect"))
+		self.showbase.auth_con = self.showbase.client
+		self.showbase.start_mainmenu(self)
 	
 	def send_message(self):
 		if self.message.GetAttribute('value')!='':
-			data = {}
-			data[0] = "chat"
-			data[1] = self.message.GetAttribute('value')
+			self.showbase.client.sendData(('chat', self.message.GetAttribute('value')))
 			self.message.SetAttribute('value','')
-			self.showbase.client.sendData(data)
 
 	def hide(self):
 		self.bg.Hide()

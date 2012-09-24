@@ -1,33 +1,36 @@
 class Spell:
-	MODELS={0:'media/spells/blockyball',1:'media/spells/pointyball'}
-	def __init__(self):
-		self.hp=0
-		self.friction=0
-		self.target_knockback=0
-		self.self_knockback=0
-		self.range=0
-		self.speed=0
-		self.aoe=False
-		self.aoe_range=0
-		self.targeting=False
-		self.casting_time=0
-		self.interruptable=False
-		self.model=0
+	MODELS = {0: 'media/spells/blockyball', 1: 'media/spells/pointyball'}
+	def __init__(self, array = None):
+		if array != None:
+			self.receive(array)
+		else:
+			self.hp=0
+			self.friction=0
+			self.target_knockback=0
+			self.self_knockback=0
+			self.range=0
+			self.speed=0
+			self.aoe=False
+			self.aoe_range=0
+			self.targeting=False
+			self.casting_time=0
+			self.interruptable=False
+			self.model=0
 	
 	def send(self):
-		array={}
-		array[0]=self.hp
-		array[1]=self.friction
-		array[2]=self.target_knockback
-		array[3]=self.self_knockback
-		array[4]=self.range
-		array[5]=self.speed
-		array[6]=self.aoe
-		array[7]=self.aoe_range
-		array[8]=self.targeting
-		array[9]=self.casting_time
-		array[10]=self.interruptable
-		array[11]=self.model
+		array = []
+		array.append(self.hp)
+		array.append(self.friction)
+		array.append(self.target_knockback)
+		array.append(self.self_knockback)
+		array.append(self.range)
+		array.append(self.speed)
+		array.append(self.aoe)
+		array.append(self.aoe_range)
+		array.append(self.targeting)
+		array.append(self.casting_time)
+		array.append(self.interruptable)
+		array.append(self.model)
 		return array
 	
 	def receive(self,array):
