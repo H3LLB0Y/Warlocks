@@ -24,98 +24,139 @@ class MainMenu():
 			scale  = 0.06
 		)
 
-		self.ip = "127.0.0.1" # Should make this write to file... so that the user can save ip's...
+		self.ip = '127.0.0.1' # Should make this write to file... so that the user can save ip's...
 		# yep thats a good idea, there will be a few things i guess that need to be done like this
 		# like settings and keys and whatnot
 		
-		self.params = ['3', '8']
-
-		self.buttons = []
 		# Buttons
-		boxloc = Vec3(0.0, 0.0, 0.0)
+		self.buttons = []
+		serverButtons = Vec3(-0.60, 0, -0.79)
 		# Host
-		p = boxloc + Vec3(-0.85, 0, -0.79)
-		self.hostButton = DirectButton(text = "Host", pos = p,  scale = 0.048, relief = DGG.GROOVE, command = self.showbase.host_game, extraArgs = [self.params])
+		self.params = ['3', '8']
+		p = serverButtons + Vec3(-0.25, 0, 0)
+		self.hostButton = DirectButton(text = 'Host', pos = p,  scale = 0.048, relief = DGG.GROOVE, command = self.showbase.host_game, extraArgs = [self.params])
 		self.buttons.append(self.hostButton)
-		
-		p = boxloc + Vec3(-0.60, 0, -0.79)
-		self.joinButton = DirectButton(text = "Join", pos = p, scale = 0.048, relief = DGG.GROOVE, command = self.join_server)
+		# Join
+		p = serverButtons + Vec3(0.0, 0.0, 0.0)
+		self.joinButton = DirectButton(text = 'Join', pos = p, scale = 0.048, relief = DGG.GROOVE, command = self.join_server)
 		self.buttons.append(self.joinButton)
-		
-		self.addButton("Join Server", self.join_server, 1, -.1)
-		
-		self.entry = DirectEntry(
-			command = self.setIp,
-			focusInCommand = self.clearText,
-			frameSize   = (-3, 3, -.5, 1),
-			initialText = self.ip,
-			parent      = self.buttons[0],
-			pos         = (0, -0.6, -1.5),
-			text        = "" ,
-			text_align  = TextNode.ACenter,
-		)
-		
-		self.addButton("QUIT!", showbase.quit, 1, -.5)
-		
-		# need to add the chat stuff
-		# i guess have like a chat manager which will hold an array of 'chat_instances'
-		# and the chat manager can sort out which is displayed and which channel the text is sent from/received to
-		# a bit more thinking needs to be done i guess
-		# can discuss sometime (not really that important now :P)
-		
-		# also i guess the layout and shit will need to be sorted (for whoever is doing the designing)
-		
-		# current games list (need to implement this)
-		# it should send a query to the master server to get the current list (just ip's atmo i guess)
-		
-		# have a time limit on wait before new refresh is requested
-		# when one is clicked on and selected it should be tracked so when the refresh happens it still is selected
-		self.servers = []
-		
-		p = boxloc + Vec3(-0.35, 0, -0.79)
-		self.refreshButton = DirectButton(text = "Refresh", pos = p, scale = 0.048, relief = DGG.GROOVE, command = self.query_servers)
-		# when refresh button is pressed (maybe instead on auto time) send query
-		self.buttons.append(self.refreshButton)
-		
-		self.query = False
-		self.query_servers()
-		
-		# options shit aswell needs to be sorted
-		# maybe just an overlay or something
-		
-		# functionality for the host button (popup an overlay that will be able to set options and then 'start_game' button
-		# then should auto connect and go to lobby (will be same as for all clients, except have a couple of different buttons i guess)
-		# close game instead of disconnect, start game instead of ready (greyed until all others are ready), kick button i suppose
-		
-		# once the options are set the 'server_inst' should be started on the local computer (which will broadcast to master server, once host can successfully connect)
-		# then game client will move to pregame state (connect to the server, and wait for others and ready)
+		# Refresh
+		if self.showbase.online:
+			p = serverButtons + Vec3(0.25, 0, 0)
+			self.refreshButton = DirectButton(text = "Refresh", pos = p, scale = 0.048, relief = DGG.GROOVE, command = self.refresh_start)
+			self.buttons.append(self.refreshButton)
+			self.refresh_start()
+			
+			chatFrameCenter = (0.0, 0.325)
+			chatFrameSize = (2.5, 1.2)
+			self.chat = DirectFrame(
+							frameColor = (0, 0, 0, 1),
+							frameSize = (chatFrameSize[0] / 2, - chatFrameSize[0] / 2,  chatFrameSize[1] / 2, - chatFrameSize[1] / 2),
+							pos = (chatFrameCenter[0], 0, chatFrameCenter[1])
+						)
+			
+			channelFrameSize = (chatFrameSize[0] / 4, chatFrameSize[1])
+			channelFrameCenter = (- chatFrameSize[0] / 2 + channelFrameSize[0] / 2, 0)
+			numItemsVisible = 8
+			itemHeight = channelFrameSize[1] / (numItemsVisible + 1)
+			self.channels = DirectScrolledList(
+								parent = self.chat,
+								pos = (channelFrameCenter[0], 0, channelFrameCenter[1]),
+								frameSize = (- channelFrameSize[0] / 2, channelFrameSize[0] / 2, channelFrameSize[1] / 2, - channelFrameSize[1] / 2),
+								frameColor = (1, 0, 0, 0.5),
+								numItemsVisible = numItemsVisible,
+								forceHeight = itemHeight,
 
-		# start packet handler for server requests and whatever else
-		taskMgr.doMethodLater(0.25, self.packet_handler, 'Packet Handler')
+								#itemFrame_frameSize = (- channelFrameSize[0] / 2.1, channelFrameSize[0] / 2.1, itemHeight, - channelFrameSize[1] + itemHeight),
+								itemFrame_pos = (0, 0, channelFrameSize[1] / 2 - itemHeight),
 
-	def packet_handler(self, task):
-		temp = self.showbase.client.getData()
-		if temp != []:
-			for package in temp:
-				if len(package) == 2:
-					# Handle Server Query
-					if package[0] == 'server':
-						self.servers.append(package[1])
-						print 'server', package[1]
-					elif package[0] == 'final':
-						self.query = False
-						#return task.done
-					else:
-						self.showbase.client.passData(package)
-		return task.again
+								decButton_pos = (-0.2, 0, channelFrameCenter[1] - channelFrameSize[1] / 2 + itemHeight / 4),
+								decButton_text = 'Prev',
+								decButton_text_scale = 0.05,
+								decButton_borderWidth = (0.005, 0.005),
 
-	def query_servers(self):
-		if not self.query:
-			self.query=True
-			if self.showbase.client.getConnected():
-				self.showbase.client.sendData('server_query')
-				self.servers = []
-				# perhaps start a task to check for timeout also
+								incButton_pos = (0.2, 0, channelFrameCenter[1] - channelFrameSize[1] / 2 + itemHeight / 4),
+								incButton_text = 'Next',
+								incButton_text_scale = 0.05,
+								incButton_borderWidth = (0.005, 0.005),
+							)
+
+			b1 = DirectButton(text = ("Button1", "click!", "roll", "disabled"),
+								text_scale = 0.1, borderWidth = (0.01, 0.01),
+								relief = 2)
+			 
+			b2 = DirectButton(text = ("Button2", "click!", "roll", "disabled"),
+								text_scale = 0.1, borderWidth = (0.01, 0.01),
+								relief = 2)
+			
+			l1 = DirectLabel(text = "Test1", text_scale = 0.1)
+			l2 = DirectLabel(text = "Test2", text_scale = 0.1)
+			l3 = DirectLabel(text = "Test3", text_scale = 0.1)
+
+			self.channels.addItem(b1)
+			self.channels.addItem(b2)
+			self.channels.addItem(l1)
+			self.channels.addItem(l2)
+			self.channels.addItem(l3)
+
+			for fruit in ['apple', 'pear', 'banana', 'orange', 'cake', 'chocolate']:
+				l = DirectLabel(text = fruit, text_scale = 0.1)
+				self.channels.addItem(l) 
+			# need to add the chat stuff
+			# i guess have like a chat manager which will hold an array of 'chat_instances'
+			# and the chat manager can sort out which is displayed and which channel the text is sent from/received to
+			# a bit more thinking needs to be done i guess
+			# can discuss sometime (not really that important now :P)
+			
+			# also i guess the layout and shit will need to be sorted (for whoever is doing the designing)
+			
+			# current games list (need to implement this)
+			# it should send a query to the master server to get the current list (just ip's atmo i guess)
+			
+			# options shit aswell needs to be sorted
+			# maybe just an overlay or something
+			
+			# functionality for the host button (popup an overlay that will be able to set options and then 'start_game' button
+			# then should auto connect and go to lobby (will be same as for all clients, except have a couple of different buttons i guess)
+			# close game instead of disconnect, start game instead of ready (greyed until all others are ready), kick button i suppose
+			
+			# once the options are set the 'server_inst' should be started on the local computer (which will broadcast to master server, once host can successfully connect)
+			# then game client will move to pregame state (connect to the server, and wait for others and ready)
+		else:
+			self.entry = DirectEntry(
+							command = self.setIp,
+							focusInCommand = self.clearText,
+							frameSize   = (-3, 3, -.5, 1),
+							initialText = self.ip,
+							parent      = self.buttons[0],
+							pos         = (0, -0.6, -1.5),
+							text_align  = TextNode.ACenter,
+						)
+
+	def refresh_start(self):
+		self.refreshButton["state"] = DGG.DISABLED
+		if self.showbase.auth_con.getConnected():
+			self.servers = []
+			self.showbase.auth_con.sendData('server_query')
+			taskMgr.doMethodLater(0.25, self.query_servers, 'Server Query')
+
+	def query_servers(self, task):
+		finished = False
+		temp = self.showbase.auth_con.getData()
+		for package in temp:
+			if len(package) == 2:
+				# Handle Server Query
+				if package[0] == 'server':
+					self.servers.append(package[1])
+					print package[1]
+				elif package[0] == 'final':
+					self.refreshButton["state"] = DGG.NORMAL
+					finished = True
+				else:
+					self.showbase.auth_con.passData(package)
+		if finished:
+			return task.done
+		return task.cont
 
 	def join_chat(self):
 		pass
@@ -126,10 +167,7 @@ class MainMenu():
 		# While this is busy happening the client stays connected to the lobby server.
 		
 	def join_server(self):
-		self.setIp(self.entry.get())
 		self.status.setText('Attempting to join server @ ' + self.ip + '...')
-		# Store connection to lobby and chat i guess eventually
-		self.showbase.auth_con = self.showbase.client
 		# attempt to connect to the game server
 		self.showbase.client = Client(self.ip, 9099, compress = True)
 		if self.showbase.client.getConnected():
@@ -137,7 +175,6 @@ class MainMenu():
 			self.showbase.client.sendData(('username', self.showbase.username))
 			taskMgr.add(self.authorization_listener, 'Authorization Listener')
 		else:
-			self.showbase.client = self.showbase.auth_con
 			self.status.setText('Could not Connect...')
 
 	def authorization_listener(self, task):
@@ -150,7 +187,6 @@ class MainMenu():
 						print 'Authentication Successful'
 						auth = True
 					elif package[0] == 'fail':
-						self.showbase.client = self.showbase.auth_con
 						self.status.setText('Authentication failed on server...')
 						return task.done
 					else:
@@ -160,25 +196,20 @@ class MainMenu():
 			return task.done
 		return task.again
 
-	def addButton(self, text, command, xPos, zPos):
-		button = DirectButton(
-			command   = command,
-			frameSize = (-2, 2, -.3, 1),
-			pos       = (xPos, 0.0, zPos),
-			scale     = .1,
-			text      = text,
-		)
-
-		self.buttons.append(button)
-
 	def clearText(self):
 		self.entry.enterText('')
 
 	def hide(self):
+		taskMgr.remove('Server Query Timeout')
 		self.background.destroy()
 		for b in self.buttons:
 			b.destroy()
 		self.status.destroy()
+		if self.showbase.online:
+			self.chat.destroy()
+			self.channels.destroy()
+		else:
+			self.entry.destroy()
 
 	def setIp(self, ip):
 		self.ip = ip

@@ -8,7 +8,7 @@ from pandac.PandaModules import *
 import rencode
 
 class Client:
-	def __init__(self, host, port, timeout=3000, compress=False):
+	def __init__(self, host, port, timeout = 3000, compress=False):
 		self.host = host
 		self.port = port
 		self.timeout = timeout
@@ -16,7 +16,7 @@ class Client:
 
 		self.cManager = QueuedConnectionManager()
 		self.cReader = QueuedConnectionReader(self.cManager, 0)
-		self.cWriter = ConnectionWriter(self.cManager,0)
+		self.cWriter = ConnectionWriter(self.cManager, 0)
 
 		# By default, we are not connected
 		self.connected = False
@@ -26,15 +26,19 @@ class Client:
 		self.connect(self.host, self.port, self.timeout)
 		self.startPolling()
 
-	def connect(self, host, port, timeout=3000):
+	def startPolling(self):
+		taskMgr.add(self.tskDisconnectPolling, "clientDisconnectTask", -39)
+
+	def connect(self, host, port, timeout = 3000):
 		# Connect to our host's socket
 		self.myConnection = self.cManager.openTCPClientConnection(host, port, timeout)
 		if self.myConnection:
 			self.cReader.addConnection(self.myConnection)  # receive messages from server
 			self.connected = True # Let us know that we're connected
 
-	def startPolling(self):
-		taskMgr.add(self.tskDisconnectPolling, "clientDisconnectTask", -39)
+	def getConnected(self):
+		# Check whether we are connected or not
+		return self.connected
 
 	def tskDisconnectPolling(self, task):
 		while self.cManager.resetConnectionAvailable() == True:
@@ -54,11 +58,7 @@ class Client:
 		myIterator = PyDatagramIterator(netDatagram)
 		return self.decode(myIterator.getString())
 
-	def getConnected(self):
-		# Check whether we are connected or not
-		return self.connected
-
-	def encode(self, data, compress=False):
+	def encode(self, data, compress = False):
 		# encode(and possibly compress) the data with rencode
 		return rencode.dumps(data, compress)
 

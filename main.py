@@ -1,6 +1,6 @@
 from pandac.PandaModules import loadPrcFileData
 loadPrcFileData("",
-"""    
+"""
 	window-title WARLOCK [ARENA]
 	fullscreen 0
 	win-size 1024 768
@@ -52,7 +52,7 @@ class Main(ShowBase):
 		self.round = Round(self)
 		
 	def host_game(self, params):
-		pid = Popen(["python", "server_inst.py", params]).pid
+		pid = Popen(["python", "server.py", params]).pid
 	
 	def quit(self):
 		sys.exit()

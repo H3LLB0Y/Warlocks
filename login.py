@@ -56,10 +56,12 @@ class Login():
 		# checking variable to stop multiple presses of the button spawn multiple tasks
 		self.request_attempt = False
 		
-		self.showbase.client = Client(self.LOGIN_IP, self.LOGIN_PORT, compress = True)
-		if not self.showbase.client.getConnected():
-			self.updateStatus("Could not connect to the Login server")
-			self.showbase.client = False
+		self.showbase.auth_con = Client(self.LOGIN_IP, self.LOGIN_PORT, compress = True)
+		if not self.showbase.auth_con.getConnected():
+			self.updateStatus("Could not connect to the Login server\nOFFLINE MODE")
+
+		# just for testing to automatically login
+		self.attemptLogin()
 
 	def update_config(self):
 		config = ConfigParser.RawConfigParser()
@@ -167,20 +169,21 @@ class Login():
 	def request(self, username, password, request):
 		if not self.request_attempt:
 			# attempt to connect again if it failed on startup
-			if not self.showbase.client:
-				self.showbase.client = Client(self.LOGIN_IP, self.LOGIN_PORT, compress = True)
-			if self.showbase.client.getConnected():
+			if self.showbase.auth_con.getConnected():
 				self.request_attempt = True
 				self.loginButton["state"] = DGG.DISABLED
 				self.createAccButton["state"] = DGG.DISABLED
-				self.showbase.client.sendData((request, (username, password)))
-				# Add the handler for the login stage.
+				self.showbase.auth_con.sendData((request, (username, password)))
+				self.showbase.username = username
+				self.showbase.online = True
 				taskMgr.doMethodLater(0.2, self.response_reader, 'Update Login')
 			else:
 				# client not connected to login/auth server so display message
-				self.updateStatus("Could not connect to the Login server")
-				self.showbase.client = False
-				self.request_attempt = False
+				self.updateStatus("Offline Mode")
+				self.showbase.username = username
+				self.showbase.online = False
+				self.update_config()
+				self.showbase.start_mainmenu(self)
 	
 	def response_reader(self, task):
 		if task.time > 2.5:
@@ -189,55 +192,54 @@ class Login():
 			self.updateStatus("Timeout from Login server")
 			return task.done
 		else:
-			temp = self.showbase.client.getData()
-			if temp != []:
-				for package in temp:
-					if len(package) == 2:
-						print "Received: " + str(package)
-						print "Connected to login server"
-						if package[0] == 'login_failed':
-							print "Login failed: ", package[1]
-							if package[1] == 'username':
-								self.updateStatus("Username Doesnt Exist")
-								self.passwordBox.set("")
-								self.usernameBox.set("")
-								self.passwordBox['focus'] = 0
-								self.usernameBox['focus'] = 1
-							elif package[1] == 'password':
-								self.updateStatus("Password Incorrect")
-								self.passwordBox.set("")
-								self.usernameBox['focus'] = 0
-								self.passwordBox['focus'] = 1
-							elif package[1] == 'logged':
-								self.updateStatus("Username already logged in")
-							self.request_attempt = False
-							self.loginButton["state"] = DGG.NORMAL
-							self.createAccButton["state"] = DGG.NORMAL
-							return task.done
-						elif package[0] == 'login_valid':
-							print "Login valid: ", package[1]
-							self.updateStatus(package[1])
-							self.update_config()
-							self.showbase.start_mainmenu(self)
-							return task.done
-						elif package[0] == 'create_failed':
-							print "Create failed: ", package[1]
-							if package[1] == 'exists':
-								self.updateStatus("Username Already Exists")
-								self.passwordBox.set("")
-								self.usernameBox.set("")
-								self.passwordBox['focus'] = 0
-								self.usernameBox['focus'] = 1
-							self.request_attempt = False
-							self.loginButton["state"] = DGG.NORMAL
-							self.createAccButton["state"] = DGG.NORMAL
-							return task.done
-						elif package[0] == 'create_success':
-							print "Create success", package[1]
-							self.updateStatus("Account Created Successfully")
-							self.request_attempt = False
-							self.attemptLogin()
-							return task.done
+			temp = self.showbase.auth_con.getData()
+			for package in temp:
+				if len(package) == 2:
+					print "Received: " + str(package)
+					print "Connected to login server"
+					if package[0] == 'login_failed':
+						print "Login failed: ", package[1]
+						if package[1] == 'username':
+							self.updateStatus("Username Doesnt Exist")
+							self.passwordBox.set("")
+							self.usernameBox.set("")
+							self.passwordBox['focus'] = 0
+							self.usernameBox['focus'] = 1
+						elif package[1] == 'password':
+							self.updateStatus("Password Incorrect")
+							self.passwordBox.set("")
+							self.usernameBox['focus'] = 0
+							self.passwordBox['focus'] = 1
+						elif package[1] == 'logged':
+							self.updateStatus("Username already logged in")
+						self.request_attempt = False
+						self.loginButton["state"] = DGG.NORMAL
+						self.createAccButton["state"] = DGG.NORMAL
+						return task.done
+					elif package[0] == 'login_valid':
+						print "Login valid: ", package[1]
+						self.updateStatus(package[1])
+						self.update_config()
+						self.showbase.start_mainmenu(self)
+						return task.done
+					elif package[0] == 'create_failed':
+						print "Create failed: ", package[1]
+						if package[1] == 'exists':
+							self.updateStatus("Username Already Exists")
+							self.passwordBox.set("")
+							self.usernameBox.set("")
+							self.passwordBox['focus'] = 0
+							self.usernameBox['focus'] = 1
+						self.request_attempt = False
+						self.loginButton["state"] = DGG.NORMAL
+						self.createAccButton["state"] = DGG.NORMAL
+						return task.done
+					elif package[0] == 'create_success':
+						print "Create success", package[1]
+						self.updateStatus("Account Created Successfully")
+						self.request_attempt = False
+						self.attemptLogin()
+						return task.done
 			return task.cont
 		
 	def cycleLoginBox(self):
